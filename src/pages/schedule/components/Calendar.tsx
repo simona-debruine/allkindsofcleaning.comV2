@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 interface CalendarProps {
   selectedDate: Date | null;
   onSelectDate: (date: Date) => void;
+  className?: string;
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -11,7 +12,7 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-export default function Calendar({ selectedDate, onSelectDate }: CalendarProps) {
+export default function Calendar({ selectedDate, onSelectDate, className = "" }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const today = new Date();
@@ -82,7 +83,7 @@ export default function Calendar({ selectedDate, onSelectDate }: CalendarProps) 
   const isPast = (date: Date) => date.getTime() < today.getTime();
 
   return (
-    <div className="bg-background-100 rounded-xl border border-background-200/70 p-4 md:p-5">
+    <div className={`bg-background-100 rounded-xl border border-background-200/70 p-4 md:p-5 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button

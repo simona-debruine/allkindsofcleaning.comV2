@@ -5,6 +5,7 @@ import NotFound from "../pages/NotFound";
 const Home = lazy(() => import("../pages/home/page"));
 const ServicesPage = lazy(() => import("../pages/services/page"));
 const SchedulePage = lazy(() => import("../pages/schedule/page"));
+const EstimatePage = lazy(() => import("../pages/estimate/page"));
 const BookingConfirmationPage = lazy(() => import("../pages/booking-confirmation/page"));
 
 const routes: RouteObject[] = [
@@ -19,6 +20,10 @@ const routes: RouteObject[] = [
   {
     path: "/schedule",
     element: <SchedulePage />,
+  },
+  {
+    path: "/estimate",
+    element: <EstimatePage />,
   },
   {
     path: "/booking-confirmation",

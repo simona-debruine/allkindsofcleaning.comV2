@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 import RaindropHero from "./components/RaindropHero";
 import ServicesSection from "./components/ServicesSection";
@@ -9,6 +9,12 @@ import ContactCTA from "./components/ContactCTA";
 
 export default function Home() {
   const location = useLocation();
+
+  useLayoutEffect(() => {
+    if (location.hash !== "#contact") {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, location.hash]);
 
   useEffect(() => {
     if (location.hash === "#contact") {

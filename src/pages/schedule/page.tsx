@@ -1,7 +1,10 @@
-import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useLayoutEffect, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAvailableSlots, useBookedSlotsForDate, useBookingsForDate } from "@/hooks/useBookings";
+import { bookingStore } from "@/lib/schedule/bookingStore";
 import Calendar from "./components/Calendar";
 import TimeSlotPicker from "./components/TimeSlotPicker";
+import BookingsPanel from "./components/BookingsPanel";
 
 const serviceTypes = [
   "Residential Cleaning",
@@ -12,30 +15,27 @@ const serviceTypes = [
   "Window Cleaning",
 ];
 
-const TIME_SLOTS = [
-  "8:00 AM",
-  "9:00 AM",
-  "10:00 AM",
-  "11:00 AM",
-  "12:00 PM",
-  "1:00 PM",
-  "2:00 PM",
-  "3:00 PM",
-  "4:00 PM",
-  "5:00 PM",
-  "6:00 PM",
-  "7:00 PM",
-  "8:00 PM",
-];
-
 const FORM_URL = "https://readdy.ai/api/form/d9824m7k7gok24d49vig";
 
+function getTodayDate(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
 export default function SchedulePage() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(getTodayDate);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
+  const availableSlots = useAvailableSlots(selectedDate);
+  const dateBookings = useBookingsForDate(selectedDate);
+  const bookedSlots = useBookedSlotsForDate(selectedDate);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,7 +46,7 @@ export default function SchedulePage() {
     if (honeypot !== "") {
       setStatus("success");
       form.reset();
-      setSelectedDate(null);
+      setSelectedDate(getTodayDate());
       setSelectedTime(null);
       return;
     }
@@ -83,14 +83,25 @@ export default function SchedulePage() {
         !serverMsg.toLowerCase().includes("form data is spam");
 
       if (isSuccess) {
-        const bookingData = {
-          date: formatDateForInput(selectedDate),
-          time: selectedTime || "",
-          service: (formData.get("service") as string) || "",
-          name: (formData.get("name") as string) || "",
-        };
+        const date = formatDateForInput(selectedDate);
+        const time = selectedTime || "";
+        const service = (formData.get("service") as string) || "";
+        const name = (formData.get("name") as string) || "";
+
+        bookingStore.addBooking({
+          date,
+          startTime: time,
+          service,
+          name,
+          email: (formData.get("email") as string) || "",
+          phone: (formData.get("phone") as string) || "",
+          address: (formData.get("address") as string) || "",
+          notes: (formData.get("notes") as string) || "",
+        });
+
+        const bookingData = { date, time, service, name };
         form.reset();
-        setSelectedDate(null);
+        setSelectedDate(getTodayDate());
         setSelectedTime(null);
         setStatus("idle");
         navigate("/booking-confirmation", { state: bookingData });
@@ -150,10 +161,10 @@ export default function SchedulePage() {
 
       {/* Booking Section */}
       <section className="w-full py-16 md:py-24 px-6 lg:px-10">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto flex flex-col gap-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-            {/* Left column — Calendar + Time slots */}
-            <div className="lg:col-span-5 space-y-6">
+            {/* Left column — Calendar and available times */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
               <Calendar
                 selectedDate={selectedDate}
                 onSelectDate={(date) => {
@@ -165,37 +176,13 @@ export default function SchedulePage() {
               <TimeSlotPicker
                 selectedTime={selectedTime}
                 onSelectTime={setSelectedTime}
-                availableSlots={selectedDate ? TIME_SLOTS : []}
+                availableSlots={availableSlots}
+                bookedSlots={bookedSlots}
               />
-
-              {/* Selected summary */}
-              <div className="bg-primary-50 rounded-xl border border-primary-200/70 p-5">
-                <h4 className="font-heading font-semibold text-sm text-primary-800 mb-3 uppercase tracking-wide">
-                  Your Selection
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-100 text-primary-600">
-                      <i className="ri-calendar-line" />
-                    </div>
-                    <span className="text-sm text-foreground-700">
-                      {formatDisplayDate(selectedDate)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-100 text-primary-600">
-                      <i className="ri-time-line" />
-                    </div>
-                    <span className="text-sm text-foreground-700">
-                      {selectedTime || "Select a time slot"}
-                    </span>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Right column — Form */}
-            <div className="lg:col-span-7">
+            {/* Right column — booking form and scheduled bookings */}
+            <div className="lg:col-span-7 flex flex-col gap-6">
               <div className="bg-background-100 rounded-xl p-6 md:p-8 border border-background-200/70">
                 <h2 className="font-heading font-semibold text-xl text-foreground-950 mb-1">
                   Complete Your Booking
@@ -345,43 +332,48 @@ export default function SchedulePage() {
                   )}
                 </form>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Bottom info bar */}
-      <section className="w-full bg-background-100 border-t border-background-200/70 py-12 md:py-16 px-6 lg:px-10">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary-100 text-primary-600">
-              <i className="ri-phone-line text-xl" />
-            </div>
-            <div>
-              <p className="text-xs text-foreground-500 uppercase tracking-wide">Call Us</p>
-              <a href="tel:7699260646" className="text-foreground-950 font-medium hover:text-primary-600 transition-colors">
-                (769) 926-0646
-              </a>
+              {selectedDate && (
+                <BookingsPanel
+                  bookings={dateBookings}
+                  dateLabel={formatDisplayDate(selectedDate)}
+                />
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-accent-100 text-accent-600">
-              <i className="ri-mail-line text-xl" />
+
+          {/* Contact info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-background-100 rounded-xl border border-background-200/70 py-8 md:py-10 px-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+                <i className="ri-phone-line text-xl" />
+              </div>
+              <div>
+                <p className="text-xs text-foreground-500 uppercase tracking-wide">Call Us</p>
+                <a href="tel:7699260646" className="text-foreground-950 font-medium hover:text-primary-600 transition-colors">
+                  (769) 926-0646
+                </a>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-foreground-500 uppercase tracking-wide">Email Us</p>
-              <a href="mailto:booking@allkindsofcleaning.com" className="text-foreground-950 font-medium hover:text-primary-600 transition-colors">
-                booking@allkindsofcleaning.com
-              </a>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-accent-100 text-accent-600">
+                <i className="ri-mail-line text-xl" />
+              </div>
+              <div>
+                <p className="text-xs text-foreground-500 uppercase tracking-wide">Email Us</p>
+                <a href="mailto:booking@allkindsofcleaning.com" className="text-foreground-950 font-medium hover:text-primary-600 transition-colors">
+                  booking@allkindsofcleaning.com
+                </a>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-secondary-100 text-secondary-600">
-              <i className="ri-calendar-check-line text-xl" />
-            </div>
-            <div>
-              <p className="text-xs text-foreground-500 uppercase tracking-wide">Availability</p>
-              <p className="text-foreground-950 font-medium">Mon - Sat, 8AM - 8PM</p>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-secondary-100 text-secondary-600">
+                <i className="ri-calendar-check-line text-xl" />
+              </div>
+              <div>
+                <p className="text-xs text-foreground-500 uppercase tracking-wide">Availability</p>
+                <p className="text-foreground-950 font-medium">Mon - Sat, 8AM - 8PM</p>
+              </div>
             </div>
           </div>
         </div>

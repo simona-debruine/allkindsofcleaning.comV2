@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -19,7 +20,7 @@ export default function Navbar() {
   }, [location.pathname]);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   const handleNavClick = (e: React.MouseEvent, path: string) => {
@@ -48,6 +49,7 @@ export default function Navbar() {
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
+    { label: "Estimate", href: "/estimate" },
     { label: "Schedule", href: "/schedule" },
     { label: "Contact", onClick: handleContactClick, isContact: true },
   ];
@@ -66,14 +68,15 @@ export default function Navbar() {
           <Link
             to="/"
             onClick={(e) => handleNavClick(e, "/")}
-            className={`flex items-center gap-2 font-heading font-bold text-lg md:text-xl tracking-tight transition-colors ${
+            className={`transition-colors ${
               scrolled || !isHome ? "text-foreground-950" : "text-white"
             }`}
           >
-            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-500 text-white">
-              <i className="ri-sparkling-line text-base" />
-            </span>
-            <span className="whitespace-nowrap">All Kinds of Cleaning</span>
+            <BrandLogo
+              textClassName={`font-heading font-bold text-base md:text-lg tracking-tight whitespace-nowrap ${
+                scrolled || !isHome ? "text-foreground-950" : "text-white"
+              }`}
+            />
           </Link>
 
           {/* Desktop nav */}
