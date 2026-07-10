@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { services } from "@/mocks/services";
 
@@ -52,11 +52,31 @@ function ImageCarousel({ images, serviceId }: ImageCarouselProps) {
 
 type PricingTier = "refresh" | "standard" | "deep";
 
+const ESTIMATOR_SERVICE_IDS = new Set(["residential", "airbnb", "move-in-out"]);
+
 const tierLabels: Record<PricingTier, string> = {
   refresh: "Refresh",
   standard: "Standard",
   deep: "Deep Clean",
 };
+
+function getTierButtonClass(tier: PricingTier, isActive: boolean): string {
+  const base =
+    "px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all border-2";
+
+  if (!isActive) {
+    return `${base} bg-background-100 border-background-200/70 text-foreground-600 hover:border-accent-300 hover:text-accent-700`;
+  }
+
+  switch (tier) {
+    case "refresh":
+      return `${base} bg-transparent border-accent-500 text-accent-700`;
+    case "standard":
+      return `${base} bg-accent-100 border-accent-300 text-accent-800`;
+    case "deep":
+      return `${base} bg-primary-400 border-primary-300 text-primary-900`;
+  }
+}
 
 const pricingMatrix: Record<
   string,
@@ -94,6 +114,10 @@ const faqs = [
 ];
 
 export default function ServicesPage() {
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [activeTier, setActiveTier] = useState<PricingTier>("standard");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -139,11 +163,7 @@ export default function ServicesPage() {
             {(Object.keys(tierLabels) as PricingTier[]).map((tier) => (
               <button
                 key={tier}
-                className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                  activeTier === tier
-                    ? "bg-primary-500 text-white"
-                    : "bg-background-100 border border-background-200/70 text-foreground-600 hover:border-primary-200 hover:text-primary-600"
-                }`}
+                className={getTierButtonClass(tier, activeTier === tier)}
                 onClick={() => setActiveTier(tier)}
                 type="button"
               >
@@ -227,13 +247,24 @@ export default function ServicesPage() {
                           {service.priceNote}
                         </p>
                       </div>
-                      <Link
-                        to="/schedule"
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary-500 text-white text-xs font-semibold rounded-md hover:bg-primary-600 transition-colors whitespace-nowrap"
-                      >
-                        Book Now
-                        <i className="ri-arrow-right-line" />
-                      </Link>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {ESTIMATOR_SERVICE_IDS.has(service.id) && (
+                          <Link
+                            to={`/estimate?service=${service.id}`}
+                            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-accent-500 text-accent-700 text-xs font-semibold rounded-md hover:bg-accent-50 transition-colors whitespace-nowrap"
+                          >
+                            Get Estimate
+                            <i className="ri-calculator-line" />
+                          </Link>
+                        )}
+                        <Link
+                          to="/schedule"
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-500 text-white text-xs font-semibold rounded-md hover:bg-primary-600 transition-colors whitespace-nowrap"
+                        >
+                          Book Now
+                          <i className="ri-arrow-right-line" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

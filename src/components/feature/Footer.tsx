@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -32,11 +33,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-2 font-heading font-bold text-lg text-foreground-950 mb-4">
-              <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-500 text-white">
-                <i className="ri-sparkling-line text-base" />
-              </span>
-              <span className="whitespace-nowrap">All Kinds of Cleaning</span>
+            <Link to="/" className="mb-4">
+              <BrandLogo textClassName="font-heading font-bold text-lg text-foreground-950 whitespace-nowrap" />
             </Link>
             <p className="text-foreground-600 text-sm leading-relaxed max-w-md mb-6">
               Professional residential and commercial cleaning services you can trust.

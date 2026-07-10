@@ -34,17 +34,42 @@ export const services: Service[] = [
     ],
     images: [
       {
-        url: "https://readdy.ai/api/search-image?query=Bright%20modern%20residential%20home%20interior%20after%20professional%20cleaning%2C%20sparkling%20clean%20living%20room%20with%20white%20sofa%20and%20hardwood%20floors%2C%20natural%20sunlight%20streaming%20through%20windows%2C%20fresh%20and%20pristine%20atmosphere%2C%20warm%20neutral%20tones%2C%20editorial%20interior%20photography&width=800&height=500&seq=residential-1&orientation=landscape",
-        alt: "Residential home living room after professional cleaning",
-      },
-      {
         url: "https://readdy.ai/api/search-image?query=Pristine%20modern%20kitchen%20with%20white%20countertops%20and%20stainless%20steel%20appliances%2C%20professional%20cleaning%20result%2C%20spotless%20surfaces%2C%20warm%20natural%20lighting%2C%20clean%20minimalist%20interior%20design%2C%20editorial%20photography&width=800&height=500&seq=residential-2&orientation=landscape",
         alt: "Clean modern kitchen after residential cleaning",
+      },
+      {
+        url: `${__BASE_PATH__}residential/residential-kitchen-ocean.png`,
+        alt: "Open kitchen and living area with ocean view after professional cleaning",
+      },
+      {
+        url: `${__BASE_PATH__}residential/residential-bathroom-shower.png`,
+        alt: "Clean bathroom with glass shower and light blue vanity",
+      },
+      {
+        url: `${__BASE_PATH__}residential/residential-living-bunk-ocean.png`,
+        alt: "Coastal living room with ocean view after cleaning",
+      },
+      {
+        url: `${__BASE_PATH__}residential/residential-bathroom-double-vanity.png`,
+        alt: "Spacious bathroom with double vanity and walk-in shower",
+      },
+      {
+        url: `${__BASE_PATH__}residential/residential-bedroom-ocean.png`,
+        alt: "Coastal bedroom with ocean view after professional cleaning",
+      },
+      {
+        url: `${__BASE_PATH__}residential/residential-bathroom-teal.png`,
+        alt: "Modern bathroom with teal tile accent wall",
+      },
+      {
+        url: `${__BASE_PATH__}residential/residential-lounge-bar.png`,
+        alt: "Bright living room with wet bar and white brick fireplace",
       },
     ],
     price: "$110-200",
     priceNote: "Standard Clean price. All tiers: $90-225",
     icon: "ri-home-smile-line",
+    popular: true,
   },
   {
     id: "airbnb",
@@ -70,7 +95,6 @@ export const services: Service[] = [
     price: "$125-210",
     priceNote: "Standard Clean price. All tiers: $100-280",
     icon: "ri-hotel-bed-line",
-    popular: true,
   },
   {
     id: "commercial",
@@ -85,8 +109,8 @@ export const services: Service[] = [
     ],
     images: [
       {
-        url: "https://readdy.ai/api/search-image?query=Modern%20professional%20office%20space%20after%20commercial%20cleaning%2C%20bright%20open%20workspace%20with%20desks%2C%20glass%20walls%2C%20spotless%20floors%2C%20natural%20light%2C%20clean%20corporate%20environment%2C%20white%20and%20warm%20neutral%20tones%2C%20editorial%20photography&width=800&height=500&seq=commercial-1&orientation=landscape",
-        alt: "Modern office after commercial cleaning service",
+        url: `${__BASE_PATH__}office-cleaning.png`,
+        alt: "Bright home office and guest room with desk, daybed, and blue accent wall",
       },
       {
         url: "https://readdy.ai/api/search-image?query=Clean%20corporate%20conference%20room%20with%20polished%20table%20and%20chairs%2C%20floor-to-ceiling%20windows%2C%20bright%20professional%20interior%2C%20pristine%20workspace%20environment%2C%20modern%20office%20design%2C%20natural%20daylight%2C%20editorial%20photography&width=800&height=500&seq=commercial-2&orientation=landscape",
@@ -114,8 +138,8 @@ export const services: Service[] = [
         alt: "Empty apartment after move-out cleaning",
       },
       {
-        url: "https://readdy.ai/api/search-image?query=Clean%20modern%20kitchen%20in%20empty%20apartment%2C%20sparkling%20white%20cabinets%20and%20countertops%2C%20bright%20natural%20light%2C%20move-in%20ready%20space%2C%20freshly%20cleaned%20interior%2C%20pristine%20condition%2C%20editorial%20photography&width=800&height=500&seq=movein-2&orientation=landscape",
-        alt: "Move-in ready kitchen after deep cleaning",
+        url: `${__BASE_PATH__}move-in-out-cleaning.png`,
+        alt: "Empty sunlit room with moving boxes ready for move-in or move-out cleaning",
       },
     ],
     price: "$150-275",
@@ -135,12 +159,12 @@ export const services: Service[] = [
     ],
     images: [
       {
-        url: "https://readdy.ai/api/search-image?query=Newly%20renovated%20home%20interior%20after%20post-construction%20cleaning%2C%20sparkling%20clean%20kitchen%20with%20marble%20countertops%2C%20dust-free%20environment%2C%20fresh%20renovation%20result%2C%20bright%20modern%20design%2C%20natural%20lighting%2C%20editorial%20interior%20photography&width=800&height=500&seq=postcon-1&orientation=landscape",
-        alt: "Renovated kitchen after post-construction cleaning",
+        url: `${__BASE_PATH__}post-construction-1.png`,
+        alt: "Worker vacuuming dust and debris from a construction site floor",
       },
       {
-        url: "https://readdy.ai/api/search-image?query=Clean%20renovated%20living%20room%20with%20new%20flooring%20and%20fresh%20paint%2C%20construction%20dust%20completely%20removed%2C%20bright%20and%20airy%20space%2C%20post-renovation%20professional%20cleaning%20result%2C%20modern%20interior%20design%2C%20editorial%20photography&width=800&height=500&seq=postcon-2&orientation=landscape",
-        alt: "Living room after post-construction cleanup",
+        url: `${__BASE_PATH__}post-construction-2.png`,
+        alt: "Cleaning crew using industrial vacuum on rug after construction cleanup",
       },
     ],
     price: "$250-450",
@@ -164,8 +188,8 @@ export const services: Service[] = [
         alt: "Professional window cleaning service",
       },
       {
-        url: "https://readdy.ai/api/search-image?query=Modern%20home%20interior%20with%20floor-to-ceiling%20sparkling%20clean%20windows%2C%20panoramic%20view%20through%20crystal%20clear%20glass%2C%20bright%20natural%20light%20flooding%20the%20room%2C%20clean%20and%20airy%20living%20space%2C%20white%20minimalist%20design%2C%20editorial%20photography&width=800&height=500&seq=window-2&orientation=landscape",
-        alt: "Crystal clear windows in modern home",
+        url: `${__BASE_PATH__}window-cleaning.png`,
+        alt: "Professional cleaning windows with spray bottle and microfiber cloth",
       },
     ],
     price: "$5",
