@@ -151,7 +151,7 @@ export default function SchedulePage() {
             <span className="text-white text-xs font-medium tracking-widest uppercase">Easy Booking</span>
           </span>
           <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-5">
-            Book Your <span className="font-light italic">Cleaning</span>
+            Book Your <span className="font-light italic text-accent-400">Cleaning</span>
           </h1>
           <p className="text-white/75 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             Pick a date and time that works for you. We will confirm your appointment within 24 hours.

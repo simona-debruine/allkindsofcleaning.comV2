@@ -14,37 +14,88 @@ function ImageCarousel({ images, serviceId }: ImageCarouselProps) {
     setCurrent((prev) => (prev + 1) % images.length);
   }, [images.length]);
 
+  const prev = useCallback(() => {
+    setCurrent((prevIdx) => (prevIdx - 1 + images.length) % images.length);
+  }, [images.length]);
+
   useEffect(() => {
-    const timer = setInterval(next, 4000);
+    if (images.length <= 1) return;
+    const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, images.length, current]);
+
+  // Preload adjacent slides for snappier arrow navigation
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const adjacent = [
+      images[(current + 1) % images.length],
+      images[(current - 1 + images.length) % images.length],
+    ];
+    for (const img of adjacent) {
+      const preload = new Image();
+      preload.src = img.url;
+    }
+  }, [current, images]);
+
+  if (images.length === 0) return null;
+
+  const active = images[current];
 
   return (
-    <div className="relative w-full aspect-[16/10] overflow-hidden rounded-t-xl">
-      {images.map((img, idx) => (
-        <img
-          key={`${serviceId}-${idx}`}
-          alt={img.alt}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-            idx === current ? "opacity-100" : "opacity-0"
-          }`}
-          src={img.url}
-        />
-      ))}
+    <div className="relative w-full aspect-[16/10] overflow-hidden rounded-t-xl group/carousel">
+      <img
+        key={`${serviceId}-${current}`}
+        alt={active.alt}
+        className="absolute inset-0 w-full h-full object-cover"
+        src={active.url}
+      />
       {images.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-          {images.map((_, idx) => (
-            <button
-              key={idx}
-              aria-label={`Show image ${idx + 1}`}
-              className={`w-1.5 h-1.5 rounded-full transition-all ${
-                idx === current ? "bg-white w-4" : "bg-white/50 hover:bg-white/70"
-              }`}
-              onClick={() => setCurrent(idx)}
-              type="button"
-            />
-          ))}
-        </div>
+        <>
+          <button
+            type="button"
+            aria-label="Previous image"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors opacity-90 md:opacity-0 md:group-hover/carousel:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              prev();
+            }}
+          >
+            <i className="ri-arrow-left-s-line text-xl" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next image"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors opacity-90 md:opacity-0 md:group-hover/carousel:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              next();
+            }}
+          >
+            <i className="ri-arrow-right-s-line text-xl" />
+          </button>
+          {images.length <= 12 ? (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+              {images.map((_, idx) => (
+                <button
+                  key={idx}
+                  aria-label={`Show image ${idx + 1}`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    idx === current ? "bg-white w-4" : "bg-white/50 hover:bg-white/70"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrent(idx);
+                  }}
+                  type="button"
+                />
+              ))}
+            </div>
+          ) : (
+            <span className="absolute bottom-3 right-3 z-10 rounded-md bg-black/45 px-2 py-0.5 text-[10px] font-medium text-white tabular-nums">
+              {current + 1} / {images.length}
+            </span>
+          )}
+        </>
       )}
     </div>
   );
@@ -142,7 +193,7 @@ export default function ServicesPage() {
           </span>
           <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-5">
             Services That{" "}
-            <span className="font-light italic">Sparkle</span>
+            <span className="font-light italic text-accent-400">Sparkle</span>
           </h1>
           <p className="text-white/75 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Residential homes, Airbnb/Vacation rentals, personal and commercial

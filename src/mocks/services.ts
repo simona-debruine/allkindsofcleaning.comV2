@@ -35,35 +35,275 @@ export const services: Service[] = [
     images: [
       {
         url: "https://readdy.ai/api/search-image?query=Pristine%20modern%20kitchen%20with%20white%20countertops%20and%20stainless%20steel%20appliances%2C%20professional%20cleaning%20result%2C%20spotless%20surfaces%2C%20warm%20natural%20lighting%2C%20clean%20minimalist%20interior%20design%2C%20editorial%20photography&width=800&height=500&seq=residential-2&orientation=landscape",
-        alt: "Clean modern kitchen after residential cleaning",
+        alt: "Clean modern kitchen sink after residential cleaning",
       },
       {
-        url: `${__BASE_PATH__}residential/residential-kitchen-ocean.png`,
-        alt: "Open kitchen and living area with ocean view after professional cleaning",
+        url: `${__BASE_PATH__}residential/Captiva-property-1/Bathroom-1.webp`,
+        alt: "Captiva property 1 Bathroom 1",
       },
       {
-        url: `${__BASE_PATH__}residential/residential-bathroom-shower.png`,
-        alt: "Clean bathroom with glass shower and light blue vanity",
+        url: `${__BASE_PATH__}residential/Captiva-property-1/bathroom-2.webp`,
+        alt: "Captiva property 1 bathroom 2",
       },
       {
-        url: `${__BASE_PATH__}residential/residential-living-bunk-ocean.png`,
-        alt: "Coastal living room with ocean view after cleaning",
+        url: `${__BASE_PATH__}residential/Captiva-property-1/bathroom-3.webp`,
+        alt: "Captiva property 1 bathroom 3",
       },
       {
-        url: `${__BASE_PATH__}residential/residential-bathroom-double-vanity.png`,
-        alt: "Spacious bathroom with double vanity and walk-in shower",
+        url: `${__BASE_PATH__}residential/Captiva-property-1/Bedroom-2.webp`,
+        alt: "Captiva property 1 Bedroom 2",
       },
       {
-        url: `${__BASE_PATH__}residential/residential-bedroom-ocean.png`,
-        alt: "Coastal bedroom with ocean view after professional cleaning",
+        url: `${__BASE_PATH__}residential/Captiva-property-1/dining-2.webp`,
+        alt: "Captiva property 1 dining 2",
       },
       {
-        url: `${__BASE_PATH__}residential/residential-bathroom-teal.png`,
-        alt: "Modern bathroom with teal tile accent wall",
+        url: `${__BASE_PATH__}residential/Captiva-property-1/guest-bedroom-3.webp`,
+        alt: "Captiva property 1 guest bedroom 3",
       },
       {
-        url: `${__BASE_PATH__}residential/residential-lounge-bar.png`,
-        alt: "Bright living room with wet bar and white brick fireplace",
+        url: `${__BASE_PATH__}residential/Captiva-property-1/hallway-1.webp`,
+        alt: "Captiva property 1 hallway 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-1/hallway.webp`,
+        alt: "Captiva property 1 hallway",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-1/Kitchen-2.webp`,
+        alt: "Captiva property 1 Kitchen 2",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-1/living-room-5.webp`,
+        alt: "Captiva property 1 living room 5",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-1/sitting-area.webp`,
+        alt: "Captiva property 1 sitting area",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/Bathroom.webp`,
+        alt: "Captiva property 2 Bathroom",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/Bedroom.webp`,
+        alt: "Captiva property 2 Bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/dining-1.webp`,
+        alt: "Captiva property 2 dining 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/guest-bath.webp`,
+        alt: "Captiva property 2 guest bath",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/guest-bedroom-2.webp`,
+        alt: "Captiva property 2 guest bedroom 2",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/laundry.webp`,
+        alt: "Captiva property 2 laundry",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/Living-room.webp`,
+        alt: "Captiva property 2 Living room",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-2/Private-Kitchen.webp`,
+        alt: "Captiva property 2 Private Kitchen",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/Bedroom-1.webp`,
+        alt: "Captiva property 3 Bedroom 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/bedroom-3.webp`,
+        alt: "Captiva property 3 bedroom 3",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/bedroom-4.webp`,
+        alt: "Captiva property 3 bedroom 4",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/bedroom-8.webp`,
+        alt: "Captiva property 3 bedroom 8",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/guest-bedroom.webp`,
+        alt: "Captiva property 3 guest bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/Kitchen-1.webp`,
+        alt: "Captiva property 3 Kitchen 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/kitchen.webp`,
+        alt: "Captiva property 3 kitchen",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/living-area-2.webp`,
+        alt: "Captiva property 3 living area 2",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/Living-room-1.webp`,
+        alt: "Captiva property 3 Living room 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/Living-room-2.webp`,
+        alt: "Captiva property 3 Living room 2",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/master-bath-1.webp`,
+        alt: "Captiva property 3 master bath 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/master-bath.webp`,
+        alt: "Captiva property 3 master bath",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Captiva-property-3/master-bedroom-1.webp`,
+        alt: "Captiva property 3 master bedroom 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/bathroom.webp`,
+        alt: "Sanibel property 1 bathroom",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/den.webp`,
+        alt: "Sanibel property 1 den",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/guest-bedroom-1.webp`,
+        alt: "Sanibel property 1 guest bedroom 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/kitchen-3.webp`,
+        alt: "Sanibel property 1 kitchen 3",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/living-area-1.webp`,
+        alt: "Sanibel property 1 living area 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/living-room-3.webp`,
+        alt: "Sanibel property 1 living room 3",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/master-bathroom.webp`,
+        alt: "Sanibel property 1 master bathroom",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-1/master-bedroom.webp`,
+        alt: "Sanibel property 1 master bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/bathroom-4.webp`,
+        alt: "Sanibel property 2 bathroom 4",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/bedroom-5.webp`,
+        alt: "Sanibel property 2 bedroom 5",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/bedroom-6.webp`,
+        alt: "Sanibel property 2 bedroom 6",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/bedroom.webp`,
+        alt: "Sanibel property 2 bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/dining-room.webp`,
+        alt: "Sanibel property 2 dining room",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/dining.webp`,
+        alt: "Sanibel property 2 dining",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/dinnerware.webp`,
+        alt: "Sanibel property 2 dinnerware",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/living-area.webp`,
+        alt: "Sanibel property 2 living area",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/living-room-4.webp`,
+        alt: "Sanibel property 2 living room 4",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-2/upstairs.webp`,
+        alt: "Sanibel property 2 upstairs",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-3/bar.webp`,
+        alt: "Sanibel property 3 bar",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-3/bathroom-5.webp`,
+        alt: "Sanibel property 3 bathroom 5",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-3/bathroom-6.webp`,
+        alt: "Sanibel property 3 bathroom 6",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-3/bedroom-7.webp`,
+        alt: "Sanibel property 3 bedroom 7",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-3/den-1.webp`,
+        alt: "Sanibel property 3 den 1",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-3/Kitchen-counter-gleam.webp`,
+        alt: "Sanibel property 3 Kitchen counter gleam",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-3/living-room.webp`,
+        alt: "Sanibel property 3 living room",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_10.jpg`,
+        alt: "Sanibel property 4 photo 10",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_11.jpg`,
+        alt: "Sanibel property 4 photo 11",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_2.jpg`,
+        alt: "Sanibel property 4 photo 2",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_3.jpg`,
+        alt: "Sanibel property 4 photo 3",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_4.jpg`,
+        alt: "Sanibel property 4 photo 4",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_5.jpg`,
+        alt: "Sanibel property 4 photo 5",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_6.jpg`,
+        alt: "Sanibel property 4 photo 6",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_7.jpg`,
+        alt: "Sanibel property 4 photo 7",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_8.jpg`,
+        alt: "Sanibel property 4 photo 8",
+      },
+      {
+        url: `${__BASE_PATH__}residential/Sanibel-property-4/photo_9.jpg`,
+        alt: "Sanibel property 4 photo 9",
       },
     ],
     price: "$110-200",
@@ -84,12 +324,288 @@ export const services: Service[] = [
     ],
     images: [
       {
-        url: "https://readdy.ai/api/search-image?query=Beautiful%20vacation%20rental%20interior%2C%20cozy%20beach%20house%20bedroom%20with%20white%20linens%2C%20tropical%20plants%2C%20natural%20light%2C%20fresh%20and%20inviting%20atmosphere%2C%20professionally%20cleaned%20space%2C%20warm%20neutral%20tones%2C%20editorial%20interior%20photography&width=800&height=500&seq=airbnb-1&orientation=landscape",
-        alt: "Vacation rental bedroom professionally prepared",
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/Bathroom-1.webp`,
+        alt: "Captiva property 1 Bathroom 1",
       },
       {
-        url: "https://readdy.ai/api/search-image?query=Stylish%20Airbnb%20rental%20living%20area%20with%20modern%20furniture%2C%20clean%20and%20welcoming%20interior%2C%20warm%20ambient%20lighting%2C%20potted%20plants%2C%20spotless%20hardwood%20floors%2C%20vacation%20home%20atmosphere%2C%20editorial%20photography&width=800&height=500&seq=airbnb-2&orientation=landscape",
-        alt: "Airbnb rental living space after turnover cleaning",
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/bathroom-2.webp`,
+        alt: "Captiva property 1 bathroom 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/bathroom-3.webp`,
+        alt: "Captiva property 1 bathroom 3",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/Bedroom-2.webp`,
+        alt: "Captiva property 1 Bedroom 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/dining-2.webp`,
+        alt: "Captiva property 1 dining 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/guest-bedroom-3.webp`,
+        alt: "Captiva property 1 guest bedroom 3",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/hallway-1.webp`,
+        alt: "Captiva property 1 hallway 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/hallway.webp`,
+        alt: "Captiva property 1 hallway",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/Kitchen-2.webp`,
+        alt: "Captiva property 1 Kitchen 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/living-room-5.webp`,
+        alt: "Captiva property 1 living room 5",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-1/sitting-area.webp`,
+        alt: "Captiva property 1 sitting area",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/Bathroom.webp`,
+        alt: "Captiva property 2 Bathroom",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/Bedroom.webp`,
+        alt: "Captiva property 2 Bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/dining-1.webp`,
+        alt: "Captiva property 2 dining 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/dining-area.webp`,
+        alt: "Captiva property 2 dining area",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/dining-room-1.webp`,
+        alt: "Captiva property 2 dining room 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/guest-bath.webp`,
+        alt: "Captiva property 2 guest bath",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/guest-bedroom-2.webp`,
+        alt: "Captiva property 2 guest bedroom 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/laundry.webp`,
+        alt: "Captiva property 2 laundry",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/Living-room.webp`,
+        alt: "Captiva property 2 Living room",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-2/Private-Kitchen.webp`,
+        alt: "Captiva property 2 Private Kitchen",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/Bedroom-1.webp`,
+        alt: "Captiva property 3 Bedroom 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/bedroom-3.webp`,
+        alt: "Captiva property 3 bedroom 3",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/bedroom-4.webp`,
+        alt: "Captiva property 3 bedroom 4",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/bedroom-8.webp`,
+        alt: "Captiva property 3 bedroom 8",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/guest-bedroom.webp`,
+        alt: "Captiva property 3 guest bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/Kitchen-1.webp`,
+        alt: "Captiva property 3 Kitchen 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/kitchen.webp`,
+        alt: "Captiva property 3 kitchen",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/living-area-2.webp`,
+        alt: "Captiva property 3 living area 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/Living-room-1.webp`,
+        alt: "Captiva property 3 Living room 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/Living-room-2.webp`,
+        alt: "Captiva property 3 Living room 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/master-bath-1.webp`,
+        alt: "Captiva property 3 master bath 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/master-bath.webp`,
+        alt: "Captiva property 3 master bath",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Captiva-property-3/master-bedroom-1.webp`,
+        alt: "Captiva property 3 master bedroom 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/bathroom.webp`,
+        alt: "Sanibel property 1 bathroom",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/den.webp`,
+        alt: "Sanibel property 1 den",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/guest-bedroom-1.webp`,
+        alt: "Sanibel property 1 guest bedroom 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/kitchen-3.webp`,
+        alt: "Sanibel property 1 kitchen 3",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/living-area-1.webp`,
+        alt: "Sanibel property 1 living area 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/living-room-3.webp`,
+        alt: "Sanibel property 1 living room 3",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/master-bathroom.webp`,
+        alt: "Sanibel property 1 master bathroom",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/master-bedroom.webp`,
+        alt: "Sanibel property 1 master bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-1/office.webp`,
+        alt: "Sanibel property 1 office",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/bathroom-4.webp`,
+        alt: "Sanibel property 2 bathroom 4",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/bedroom-5.webp`,
+        alt: "Sanibel property 2 bedroom 5",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/bedroom-6.webp`,
+        alt: "Sanibel property 2 bedroom 6",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/bedroom.webp`,
+        alt: "Sanibel property 2 bedroom",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/dining-room.webp`,
+        alt: "Sanibel property 2 dining room",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/dining.webp`,
+        alt: "Sanibel property 2 dining",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/dinnerware.webp`,
+        alt: "Sanibel property 2 dinnerware",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/living-area.webp`,
+        alt: "Sanibel property 2 living area",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/living-room-4.webp`,
+        alt: "Sanibel property 2 living room 4",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-2/upstairs.webp`,
+        alt: "Sanibel property 2 upstairs",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-3/bar.webp`,
+        alt: "Sanibel property 3 bar",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-3/bathroom-5.webp`,
+        alt: "Sanibel property 3 bathroom 5",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-3/bathroom-6.webp`,
+        alt: "Sanibel property 3 bathroom 6",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-3/bedroom-7.webp`,
+        alt: "Sanibel property 3 bedroom 7",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-3/den-1.webp`,
+        alt: "Sanibel property 3 den 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-3/Kitchen-counter-gleam.webp`,
+        alt: "Sanibel property 3 Kitchen counter gleam",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-3/living-room.webp`,
+        alt: "Sanibel property 3 living room",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_1.jpg`,
+        alt: "Sanibel property 4 photo 1",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_10.jpg`,
+        alt: "Sanibel property 4 photo 10",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_11.jpg`,
+        alt: "Sanibel property 4 photo 11",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_2.jpg`,
+        alt: "Sanibel property 4 photo 2",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_3.jpg`,
+        alt: "Sanibel property 4 photo 3",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_4.jpg`,
+        alt: "Sanibel property 4 photo 4",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_5.jpg`,
+        alt: "Sanibel property 4 photo 5",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_6.jpg`,
+        alt: "Sanibel property 4 photo 6",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_7.jpg`,
+        alt: "Sanibel property 4 photo 7",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_8.jpg`,
+        alt: "Sanibel property 4 photo 8",
+      },
+      {
+        url: `${__BASE_PATH__}vacation-rental/Sanibel-property-4/photo_9.jpg`,
+        alt: "Sanibel property 4 photo 9",
       },
     ],
     price: "$125-210",

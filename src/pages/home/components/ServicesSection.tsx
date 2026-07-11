@@ -30,8 +30,9 @@ export default function ServicesSection() {
         {/* Services grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {services.map((service) => (
-            <div
+            <Link
               key={service.id}
+              to="/services"
               className="group rounded-xl bg-background-100 border border-background-200/70 overflow-hidden hover:border-primary-200 hover:shadow-sm transition-all duration-300"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden">
@@ -65,7 +66,7 @@ export default function ServicesSection() {
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

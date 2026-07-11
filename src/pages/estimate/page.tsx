@@ -67,7 +67,7 @@ export default function EstimatePage() {
             <span className="text-white text-xs font-medium tracking-widest uppercase">Cost Estimator</span>
           </span>
           <h1 className="font-heading font-bold text-4xl md:text-5xl text-white leading-tight mb-4">
-            Get Your <span className="font-light italic">Estimate</span>
+            Get Your <span className="font-light italic text-accent-400">Estimate</span>
           </h1>
           <p className="text-white/80 text-base md:text-lg max-w-2xl leading-relaxed">
             Neighborhood-based pricing for residential, Airbnb turnover, and move in / move out cleaning

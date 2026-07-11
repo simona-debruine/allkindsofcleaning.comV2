@@ -50,22 +50,6 @@ export default function Footer() {
               >
                 <i className="ri-facebook-fill" />
               </a>
-              <a
-                href="#"
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-background-200/70 text-foreground-600 hover:bg-primary-500 hover:text-white transition-colors"
-                aria-label="Instagram"
-                rel="nofollow"
-              >
-                <i className="ri-instagram-line" />
-              </a>
-              <a
-                href="#"
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-background-200/70 text-foreground-600 hover:bg-primary-500 hover:text-white transition-colors"
-                aria-label="Twitter"
-                rel="nofollow"
-              >
-                <i className="ri-twitter-x-line" />
-              </a>
             </div>
           </div>
 
