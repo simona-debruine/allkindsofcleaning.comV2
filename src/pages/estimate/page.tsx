@@ -1,53 +1,218 @@
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
-  calculateEstimate,
-  estimatorServices,
+  calculateCieQuote,
+  deriveFromEnrichment,
+  enrichAddress,
   formatCurrency,
-  neighborhoods,
-  parseEstimatorService,
-  tierLabels,
+  isFieldThin,
+  type CanonicalProperty,
   type EstimatorService,
   type PricingTier,
+  type PropertyFacts,
+} from "@/lib/cie";
+import {
+  estimatorServices,
+  parseEstimatorService,
+  tierLabels,
 } from "@/mocks/neighborhoodPricing";
 
-const estimatorServiceIds: EstimatorService[] = ["residential", "airbnb", "move-in-out"];
+const jobTypes: { id: EstimatorService; label: string }[] = [
+  { id: "residential", label: "Recurring / residential" },
+  { id: "airbnb", label: "Airbnb turnover" },
+  { id: "move-in-out", label: "Move in / move out" },
+];
+
 const tierIds: PricingTier[] = ["refresh", "standard", "deep"];
+
+const fieldClass =
+  "w-full px-3 py-2.5 rounded-md border border-background-300/60 bg-background-50 text-foreground-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400";
+const labelClass = "block text-sm font-medium text-foreground-700 mb-1.5";
+const thinRing = "ring-2 ring-accent-400/70 border-accent-400";
+
+function NumberField({
+  id,
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+  hint,
+  thin,
+}: {
+  id: string;
+  label: string;
+  value: number;
+  onChange: (n: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  hint?: string;
+  thin?: boolean;
+}) {
+  const allowDecimal = step % 1 !== 0;
+  const format = (n: number) => (Number.isFinite(n) ? String(n) : "");
+  const [draft, setDraft] = useState(format(value));
+  const focusedRef = useRef(false);
+
+  useEffect(() => {
+    if (!focusedRef.current) setDraft(format(value));
+  }, [value]);
+
+  const clamp = (n: number) => {
+    let next = n;
+    if (min != null) next = Math.max(min, next);
+    if (max != null) next = Math.min(max, next);
+    return next;
+  };
+
+  const commit = (raw: string) => {
+    if (raw.trim() === "" || raw === ".") {
+      const fallback = clamp(min ?? 0);
+      setDraft(String(fallback));
+      onChange(fallback);
+      return;
+    }
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) {
+      setDraft(format(value));
+      return;
+    }
+    const next = clamp(parsed);
+    setDraft(String(next));
+    onChange(next);
+  };
+
+  return (
+    <div>
+      <label className={labelClass} htmlFor={id}>
+        {label}
+        {thin ? (
+          <span className="ml-2 text-[10px] uppercase tracking-wide text-accent-700 font-semibold">
+            Confirm
+          </span>
+        ) : null}
+      </label>
+      <input
+        id={id}
+        type="text"
+        inputMode={allowDecimal ? "decimal" : "numeric"}
+        autoComplete="off"
+        value={draft}
+        onFocus={() => {
+          focusedRef.current = true;
+        }}
+        onChange={(e) => {
+          const raw = e.target.value;
+          const pattern = allowDecimal ? /^\d*\.?\d*$/ : /^\d*$/;
+          if (raw !== "" && !pattern.test(raw)) return;
+          setDraft(raw);
+          if (raw === "" || raw === ".") return;
+          const parsed = Number(raw);
+          if (!Number.isFinite(parsed)) return;
+          // Don't clamp while typing — e.g. clearing "2400" to type "1800"
+          // would otherwise snap to min as soon as the field is empty/partial.
+          if ((min == null || parsed >= min) && (max == null || parsed <= max)) {
+            onChange(parsed);
+          }
+        }}
+        onBlur={() => {
+          focusedRef.current = false;
+          commit(draft);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            (e.target as HTMLInputElement).blur();
+          }
+        }}
+        className={`${fieldClass} ${thin ? thinRing : ""}`}
+      />
+      {hint ? <p className="text-xs text-foreground-400 mt-1">{hint}</p> : null}
+    </div>
+  );
+}
 
 export default function EstimatePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialService = parseEstimatorService(searchParams.get("service"));
 
+  const [address, setAddress] = useState("");
   const [service, setService] = useState<EstimatorService>(initialService);
-  const [neighborhoodId, setNeighborhoodId] = useState(neighborhoods[0].id);
   const [tier, setTier] = useState<PricingTier>("standard");
-  const [sqft, setSqft] = useState(neighborhoods[0].averageSqft);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [canonical, setCanonical] = useState<CanonicalProperty | null>(null);
+  const [thinFields, setThinFields] = useState<string[]>([]);
+  const [enrichmentNotes, setEnrichmentNotes] = useState<string[]>([]);
+  const [livingSqftSource, setLivingSqftSource] = useState<string>("");
+  const [neighborhoodId, setNeighborhoodId] = useState("");
+  const [neighborhoodName, setNeighborhoodName] = useState("");
+  const [sourceParishDisplay, setSourceParishDisplay] = useState("");
+  const [explanation, setExplanation] = useState("");
+  const [property, setProperty] = useState<PropertyFacts | null>(null);
+  const [showOverrides, setShowOverrides] = useState(false);
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const neighborhood = useMemo(
-    () => neighborhoods.find((n) => n.id === neighborhoodId) ?? neighborhoods[0],
-    [neighborhoodId],
-  );
-
-  const estimate = useMemo(
-    () => calculateEstimate(neighborhood, tier, sqft, service),
-    [neighborhood, tier, sqft, service],
-  );
+  const quote = useMemo(() => {
+    if (!property || !neighborhoodId) return null;
+    return calculateCieQuote({
+      neighborhoodId,
+      tier,
+      service,
+      propertyFacts: property,
+      cleaningProfile: {},
+      lockProfile: false,
+    });
+  }, [property, neighborhoodId, tier, service]);
 
   const serviceInfo = estimatorServices[service];
-
-  const handleNeighborhoodChange = (id: string) => {
-    setNeighborhoodId(id);
-    const next = neighborhoods.find((n) => n.id === id);
-    if (next) setSqft(next.averageSqft);
-  };
+  const sqft = Number(property?.finished_sqft ?? 0);
 
   const handleServiceChange = (next: EstimatorService) => {
     setService(next);
     setSearchParams({ service: next }, { replace: true });
+  };
+
+  const handleLookup = async (e?: FormEvent) => {
+    e?.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const result = await enrichAddress(address);
+      const derived = deriveFromEnrichment(result.property, address, {
+        parish: result.parish,
+        parishDisplay: result.parishDisplay,
+        usedGeoPriorsOnly: result.usedGeoPriorsOnly,
+      });
+
+      setCanonical(result.property);
+      setProperty(derived.propertyFacts);
+      setThinFields(derived.thinFields);
+      setEnrichmentNotes(derived.enrichmentNotes);
+      setLivingSqftSource(derived.livingSqftSource);
+      setNeighborhoodId(derived.neighborhoodId);
+      setNeighborhoodName(derived.neighborhood.name);
+      setSourceParishDisplay(derived.sourceParishDisplay);
+      setExplanation(derived.neighborhood.explanation);
+      setShowOverrides(derived.thinFields.length > 0);
+    } catch (err) {
+      setCanonical(null);
+      setProperty(null);
+      setError(err instanceof Error ? err.message : "Could not look up that address.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const setProp = <K extends keyof PropertyFacts>(key: K, value: PropertyFacts[K]) => {
+    setProperty((prev) => (prev ? { ...prev, [key]: value } : prev));
+    setThinFields((prev) => prev.filter((f) => f !== key && !(key === "finished_sqft" && f === "finished_sqft")));
   };
 
   return (
@@ -64,14 +229,16 @@ export default function EstimatePage() {
         <div className="relative z-10 w-full px-6 lg:px-10 max-w-7xl mx-auto">
           <span className="inline-flex items-center gap-2 bg-white/10 border border-white/30 rounded-full px-4 py-1.5 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-400" />
-            <span className="text-white text-xs font-medium tracking-widest uppercase">Cost Estimator</span>
+            <span className="text-white text-xs font-medium tracking-widest uppercase">
+              Cost Estimator
+            </span>
           </span>
           <h1 className="font-heading font-bold text-4xl md:text-5xl text-white leading-tight mb-4">
             Get Your <span className="font-light italic text-accent-400">Estimate</span>
           </h1>
           <p className="text-white/80 text-base md:text-lg max-w-2xl leading-relaxed">
-            Neighborhood-based pricing for residential, Airbnb turnover, and move in / move out cleaning
-            across Greater New Orleans and the Northshore.
+            Enter an address and get a tailored cleaning estimate for Greater New Orleans and the
+            Northshore.
           </p>
         </div>
       </section>
@@ -79,182 +246,274 @@ export default function EstimatePage() {
       <section className="w-full py-12 md:py-16 px-6 lg:px-10">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-background-100 rounded-xl border border-background-200/70 p-6 md:p-8">
-              <h2 className="font-heading font-semibold text-xl text-foreground-950 mb-6">
-                Build Your Estimate
-              </h2>
+            {/* Primary: address */}
+            <form
+              onSubmit={handleLookup}
+              className="bg-background-100 rounded-xl border border-background-200/70 p-6 md:p-8 space-y-5"
+            >
+              <div>
+                <h2 className="font-heading font-semibold text-xl text-foreground-950">
+                  Property address
+                </h2>
+                <p className="text-sm text-foreground-500 mt-1">
+                  We&apos;ll look up your property and prepare a quote
+                </p>
+              </div>
 
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-foreground-700 mb-2">
-                    Service Type
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {estimatorServiceIds.map((id) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => handleServiceChange(id)}
-                        className={`px-3 py-3 rounded-lg text-left text-sm font-medium border transition-all ${
-                          service === id
-                            ? "bg-primary-500 border-primary-500 text-white"
-                            : "bg-background-50 border-background-200/70 text-foreground-700 hover:border-primary-200"
-                        }`}
-                      >
-                        <i className={`${estimatorServices[id].icon} mr-1.5`} />
-                        {id === "move-in-out" ? "Move In/Out" : id === "airbnb" ? "Airbnb" : "Residential"}
-                      </button>
-                    ))}
+              <div>
+                <label className={labelClass} htmlFor="address">
+                  Street address
+                </label>
+                <input
+                  id="address"
+                  type="text"
+                  required
+                  autoComplete="street-address"
+                  placeholder="e.g. 17228 River Road, Hahnville, LA"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className={fieldClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass} htmlFor="job-type">
+                  Job type
+                </label>
+                <select
+                  id="job-type"
+                  value={service}
+                  onChange={(e) => handleServiceChange(e.target.value as EstimatorService)}
+                  className={fieldClass}
+                >
+                  {jobTypes.map((j) => (
+                    <option key={j.id} value={j.id}>
+                      {j.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-700 mb-2">
+                  Cleaning tier
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {tierIds.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setTier(t)}
+                      className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+                        tier === t
+                          ? "bg-primary-500 border-primary-500 text-white"
+                          : "bg-background-50 border-background-200/70 text-foreground-600 hover:border-primary-200"
+                      }`}
+                    >
+                      {tierLabels[t]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {error ? (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
+                  {error}
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={loading || !address.trim()}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <i className="ri-loader-4-line animate-spin" />
+                    Enriching property…
+                  </>
+                ) : (
+                  <>
+                    <i className="ri-search-line" />
+                    Get estimate
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Optional overrides — autopopulated after enrichment */}
+            {property && canonical ? (
+              <div className="bg-background-100 rounded-xl border border-background-200/70 p-6 md:p-8">
+                <button
+                  type="button"
+                  onClick={() => setShowOverrides((v) => !v)}
+                  className="w-full flex items-center justify-between gap-3 text-left"
+                >
+                  <div>
+                    <h2 className="font-heading font-semibold text-xl text-foreground-950">
+                      Confirm details
+                    </h2>
+                    <p className="text-sm text-foreground-500 mt-1">
+                      {thinFields.length > 0
+                        ? `${thinFields.length} field${thinFields.length === 1 ? "" : "s"} need confirmation — property records were incomplete`
+                        : "Filled from your property records — adjust if anything looks off"}
+                    </p>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground-700 mb-1.5" htmlFor="neighborhood">
-                    Neighborhood
-                  </label>
-                  <select
-                    id="neighborhood"
-                    value={neighborhoodId}
-                    onChange={(e) => handleNeighborhoodChange(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-md border border-background-300/60 bg-background-50 text-foreground-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                  >
-                    {neighborhoods.map((n) => (
-                      <option key={n.id} value={n.id}>
-                        {n.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground-700 mb-1.5" htmlFor="sqft">
-                    Square Footage
-                  </label>
-                  <input
-                    id="sqft"
-                    type="number"
-                    min={500}
-                    max={10000}
-                    step={50}
-                    value={sqft}
-                    onChange={(e) => setSqft(Math.max(500, Number(e.target.value) || 500))}
-                    className="w-full px-4 py-2.5 rounded-md border border-background-300/60 bg-background-50 text-foreground-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                  <i
+                    className={`ri-arrow-${showOverrides ? "up" : "down"}-s-line text-xl text-foreground-400`}
                   />
-                  <p className="text-xs text-foreground-400 mt-1.5">
-                    Defaults to {neighborhood.averageSqft.toLocaleString()} sq ft, the average home size in {neighborhood.name}. Adjust if needed.
-                  </p>
-                </div>
+                </button>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground-700 mb-2">
-                    Cleaning Tier
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {tierIds.map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setTier(t)}
-                        className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
-                          tier === t
-                            ? "bg-primary-500 border-primary-500 text-white"
-                            : "bg-background-50 border-background-200/70 text-foreground-600 hover:border-primary-200"
-                        }`}
+                {enrichmentNotes.length > 0 ? (
+                  <ul className="mt-4 space-y-2">
+                    {enrichmentNotes.map((note) => (
+                      <li
+                        key={note}
+                        className="text-sm text-accent-800 bg-accent-50 border border-accent-100 rounded-md px-3 py-2 whitespace-pre-line"
                       >
-                        {tierLabels[t]}
-                      </button>
+                        {note}
+                      </li>
                     ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+                  </ul>
+                ) : null}
 
-            <div className="bg-background-100 rounded-xl border border-background-200/70 p-6 md:p-8">
-              <h3 className="font-heading font-semibold text-lg text-foreground-950 mb-4">
-                Neighborhood Rate Guide
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] text-sm">
-                  <thead>
-                    <tr className="border-b border-background-200/70">
-                      <th className="text-left py-2 pr-4 text-xs font-medium text-foreground-400 uppercase tracking-wide">
-                        Tier
-                      </th>
-                      <th className="text-right py-2 px-2 text-xs font-medium text-foreground-400 uppercase tracking-wide">
-                        Per Sq Ft
-                      </th>
-                      <th className="text-right py-2 pl-2 text-xs font-medium text-foreground-400 uppercase tracking-wide">
-                        Avg {neighborhood.averageSqft.toLocaleString()} Sq Ft
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tierIds.map((t) => {
-                      const data = neighborhood[t];
-                      return (
-                        <tr
-                          key={t}
-                          className={`border-b border-background-200/50 ${tier === t ? "bg-primary-50/60" : ""}`}
-                        >
-                          <td className="py-3 pr-4 font-medium text-foreground-800">{tierLabels[t]}</td>
-                          <td className="py-3 px-2 text-right text-foreground-600">
-                            ${data.perSqftMin.toFixed(2)} – ${data.perSqftMax.toFixed(2)}
-                          </td>
-                          <td className="py-3 pl-2 text-right text-foreground-600">
-                            {formatCurrency(Math.round(data.perSqftMin * neighborhood.averageSqft))} – {formatCurrency(Math.round(data.perSqftMax * neighborhood.averageSqft))}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                {showOverrides ? (
+                  <div className="mt-6 space-y-5">
+                    <p className="text-xs text-foreground-400">
+                      {sourceParishDisplay ? (
+                        <>
+                          Details from{" "}
+                          <span className="font-medium text-foreground-600">{sourceParishDisplay}</span>
+                          {" · "}
+                        </>
+                      ) : null}
+                      Area: <span className="font-medium text-foreground-600">{neighborhoodName}</span>
+                      {" · "}
+                      living area from {livingSqftSource.replace(/_/g, " ")}
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <NumberField
+                        id="finished_sqft"
+                        label="Living area (sq ft)"
+                        value={Number(property.finished_sqft ?? 0)}
+                        min={400}
+                        max={15000}
+                        step={50}
+                        thin={isFieldThin(thinFields, "finished_sqft")}
+                        onChange={(n) => setProp("finished_sqft", n)}
+                        hint="Heated / finished living area"
+                      />
+                      <NumberField
+                        id="bedrooms"
+                        label="Bedrooms"
+                        value={Number(property.bedrooms ?? 0)}
+                        min={0}
+                        max={12}
+                        thin={isFieldThin(thinFields, "bedrooms")}
+                        onChange={(n) => setProp("bedrooms", n)}
+                      />
+                      <NumberField
+                        id="bathrooms"
+                        label="Bathrooms"
+                        value={Number(property.bathrooms ?? 0)}
+                        min={0}
+                        max={12}
+                        step={0.5}
+                        thin={isFieldThin(thinFields, "bathrooms")}
+                        onChange={(n) => setProp("bathrooms", n)}
+                      />
+                      <NumberField
+                        id="stories"
+                        label="Stories"
+                        value={Number(property.stories ?? 1)}
+                        min={1}
+                        max={5}
+                        step={0.5}
+                        thin={isFieldThin(thinFields, "stories")}
+                        onChange={(n) => setProp("stories", n)}
+                      />
+                      <NumberField
+                        id="year_built"
+                        label="Year built"
+                        value={Number(property.year_built ?? 1980)}
+                        min={1800}
+                        max={2026}
+                        thin={isFieldThin(thinFields, "year_built")}
+                        onChange={(n) => setProp("year_built", n)}
+                      />
+                    </div>
+
+                    <p className="text-xs text-foreground-400 leading-relaxed">
+                      Final quotes may vary with home condition, add-ons, and frequency.
+                    </p>
+                  </div>
+                ) : null}
               </div>
-            </div>
+            ) : null}
           </div>
 
           <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-24 space-y-6">
-              <div className="bg-primary-500 rounded-xl p-6 md:p-8 text-white">
-                <div className="flex items-center gap-2 mb-4">
-                  <i className={`${serviceInfo.icon} text-xl`} />
-                  <span className="text-sm font-medium text-white/80">{serviceInfo.title}</span>
-                </div>
-                <p className="text-white/75 text-sm mb-6">{serviceInfo.description}</p>
+              <div className="bg-primary-500 rounded-xl p-6 md:p-8 text-white min-h-[280px]">
+                {!quote ? (
+                  <div className="h-full flex flex-col justify-center text-white/80 py-8">
+                    <i className="ri-map-pin-line text-3xl mb-4 text-white/60" />
+                    <p className="font-heading font-semibold text-lg text-white mb-2">
+                      Your quote appears here
+                    </p>
+                    <p className="text-sm leading-relaxed">
+                      Enter an address and we&apos;ll prepare a neighborhood-aware estimate for your
+                      home.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 mb-4">
+                      <i className={`${serviceInfo.icon} text-xl`} />
+                      <span className="text-sm font-medium text-white/80">{serviceInfo.title}</span>
+                    </div>
+                    <p className="text-white/75 text-sm mb-1 truncate" title={canonical?.address}>
+                      {canonical?.address}
+                    </p>
+                    <p className="text-white/55 text-xs mb-6">
+                      {neighborhoodName}
+                      {sourceParishDisplay ? ` · ${sourceParishDisplay}` : ""}
+                    </p>
 
-                <p className="text-xs uppercase tracking-widest text-white/60 mb-1">Estimated Range</p>
-                <p className="font-heading font-bold text-3xl md:text-4xl mb-1">
-                  {formatCurrency(estimate.min)} – {formatCurrency(estimate.max)}
-                </p>
-                <p className="text-sm text-white/75 mb-6">
-                  ${estimate.perSqftMin.toFixed(2)} – ${estimate.perSqftMax.toFixed(2)} per sq ft · {sqft.toLocaleString()} sq ft
-                </p>
+                    <p className="text-xs uppercase tracking-widest text-white/60 mb-1">
+                      Estimated Quote
+                    </p>
+                    <p className="font-heading font-bold text-3xl md:text-4xl mb-1">
+                      {formatCurrency(quote.price)}
+                    </p>
+                    <p className="text-sm text-white/75 mb-1">
+                      {sqft ? (quote.price / sqft).toFixed(2) : "—"} / sq ft · {sqft.toLocaleString()}{" "}
+                      sq ft
+                    </p>
+                    <p className="text-sm text-white/75 mb-1">{tierLabels[tier]} clean</p>
+                    <p className="text-sm text-white/75 mb-6">
+                      {quote.estimated_hours.toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                      labor hours
+                    </p>
 
-                <div className="rounded-lg bg-white/10 border border-white/20 p-4 mb-6">
-                  <p className="text-xs uppercase tracking-widest text-white/60 mb-2">
-                    Local Factor — {neighborhood.name}
-                  </p>
-                  <p className="text-sm text-white/90 leading-relaxed">{estimate.localFactor}</p>
-                </div>
+                    <div className="rounded-lg bg-white/10 border border-white/20 p-4 mb-6">
+                      <p className="text-xs uppercase tracking-widest text-white/60 mb-2">
+                        Local factor
+                      </p>
+                      <p className="text-sm text-white/90 leading-relaxed">{explanation}</p>
+                    </div>
 
-                <Link
-                  to="/schedule"
-                  className="block w-full text-center px-6 py-3 rounded-md bg-white text-primary-600 font-medium text-sm hover:bg-white/90 transition-colors"
-                >
-                  Book This Service
-                </Link>
-              </div>
-
-              <div className="bg-background-100 rounded-xl border border-background-200/70 p-5 text-sm text-foreground-600 leading-relaxed">
-                <p className="font-medium text-foreground-800 mb-2">About these estimates</p>
-                <p>
-                  Rates reflect local market research by neighborhood, including parking access, ceiling height,
-                  historic detailing, and travel time. Airbnb and move in / move out services apply modest
-                  scope adjustments on top of the base residential rates.
-                </p>
-                <p className="mt-3">
-                  Final quotes may vary based on home condition, add-ons, and frequency. Contact us for a
-                  firm quote.
-                </p>
+                    <Link
+                      to="/schedule"
+                      className="block w-full text-center px-6 py-3 rounded-md bg-white text-primary-600 font-medium text-sm hover:bg-white/90 transition-colors"
+                    >
+                      Book This Service
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

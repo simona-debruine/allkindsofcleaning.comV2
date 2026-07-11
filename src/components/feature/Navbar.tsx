@@ -47,7 +47,6 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
     { label: "Estimate", href: "/estimate" },
     { label: "Schedule", href: "/schedule" },

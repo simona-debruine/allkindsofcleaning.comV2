@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "name": "expected-cleaning-profile",
+  "layer": "B",
+  "description": "Default cleaning-profile priors when geo-specific profile is absent. Feature-driven overrides preferred.",
+  "defaults": {
+    "hardwood_probability": 0.35,
+    "tile_probability": 0.35,
+    "carpet_probability": 0.30,
+    "glass_showers": 0.40,
+    "ceiling_height": "unknown",
+    "historic_trim": 0.25,
+    "pet_hair_prior": 0.30,
+    "clutter_prior": 0.35
+  }
+}

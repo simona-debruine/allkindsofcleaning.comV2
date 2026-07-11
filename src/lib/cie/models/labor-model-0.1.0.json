@@ -1,0 +1,51 @@
+{
+  "version": "0.1.0",
+  "name": "labor_model",
+  "layer": "B",
+  "owner": "DeBruine Theory Consulting",
+  "description": "Proprietary Labor Model — maps Expected Cleaning Profile + property features to labor units. Not Layer A statistics.",
+  "complexity_dimensions": {
+    "historic": {
+      "scale": [0, 10],
+      "description": "Inferred from year_built, historic district, trim priors"
+    },
+    "luxury": {
+      "scale": [0, 10],
+      "description": "Inferred from finishes, marble/glass priors, sqft band"
+    },
+    "layout": {
+      "scale": [0, 10],
+      "description": "Inferred from stories, beds/baths, floor-plan complexity"
+    },
+    "density": {
+      "scale": [0, 10],
+      "description": "Inferred from property_type, clutter prior, unit density"
+    },
+    "parking": {
+      "scale": [0, 10],
+      "description": "Inferred from geo travel/parking priors"
+    },
+    "travel": {
+      "scale": [0, 10],
+      "description": "Inferred from travel_zone / parent geo"
+    }
+  },
+  "inference": {
+    "mode": "feature_driven",
+    "notes": "Do not hardcode luxury=7. Infer complexity from property + cleaning profile features."
+  },
+  "labor": {
+    "base_lu_per_100_sqft": 4.0,
+    "notes": "Baseline labor units before complexity multipliers"
+  },
+  "score_bands": {
+    "low": { "max_complexity_sum": 24, "time_multiplier": 1.0 },
+    "medium": { "max_complexity_sum": 36, "time_multiplier": 1.15 },
+    "high": { "max_complexity_sum": 48, "time_multiplier": 1.35 },
+    "very_high": { "min_complexity_sum": 48, "time_multiplier": 1.55 }
+  },
+  "calibration": {
+    "updates": "labor_model",
+    "does_not_update": ["canonical_property", "expected_house", "geo_nodes"]
+  }
+}

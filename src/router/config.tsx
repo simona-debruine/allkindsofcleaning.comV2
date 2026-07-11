@@ -1,11 +1,11 @@
 import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
 import NotFound from "../pages/NotFound";
+import EstimatePage from "../pages/estimate/page";
 
 const Home = lazy(() => import("../pages/home/page"));
 const ServicesPage = lazy(() => import("../pages/services/page"));
 const SchedulePage = lazy(() => import("../pages/schedule/page"));
-const EstimatePage = lazy(() => import("../pages/estimate/page"));
 const BookingConfirmationPage = lazy(() => import("../pages/booking-confirmation/page"));
 
 const routes: RouteObject[] = [
