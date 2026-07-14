@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Same-origin-compatible enrich BFF for allkindsofcleaning.com Amplify SPA.
+  Proxies POST → Property Enrichment Engine with x-api-key held in Lambda env.
+
+Parameters:
+  StageName:
+    Type: String
+    Default: prod
+  PropertyEnrichmentUrl:
+    Type: String
+    Default: https://9ug42crh6h.execute-api.us-east-1.amazonaws.com/prod
+  PropertyEnrichmentApiKey:
+    Type: String
+    NoEcho: true
+    Description: API key for allkindsofcleaning-prod (from PEE stack / Secrets Manager)
+  CorsOrigins:
+    Type: String
+    Default: "https://allkindsofcleaning.com,https://www.allkindsofcleaning.com,http://localhost:3000,http://127.0.0.1:3000"
+
+Resources:
+  EnrichBffFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub allkinds-enrich-bff-${StageName}
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Handler: index.handler
+      CodeUri: .
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          PROPERTY_ENRICHMENT_URL: !Ref PropertyEnrichmentUrl
+          PROPERTY_ENRICHMENT_API_KEY: !Ref PropertyEnrichmentApiKey
+          CORS_ORIGINS: !Ref CorsOrigins
+      FunctionUrlConfig:
+        AuthType: NONE
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+Outputs:
+  FunctionUrl:
+    Description: Set as Amplify env VITE_ENRICH_BFF_URL (or Amplify 200-rewrite target for /api/property/enrich)
+    Value: !GetAtt EnrichBffFunctionUrl.FunctionUrl
+  FunctionName:
+    Value: !Ref EnrichBffFunction
