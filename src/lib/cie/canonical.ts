@@ -26,6 +26,15 @@ export interface CanonicalProperty {
   notes?: string;
 }
 
+export interface EnrichResult {
+  property: CanonicalProperty;
+  /** Resolved parish used for lookup / messaging */
+  parish: string | null;
+  parishDisplay: string;
+  /** True when we used geo priors only (no live parish GIS) */
+  usedGeoPriorsOnly: boolean;
+}
+
 export interface EnrichResponse {
   ok: boolean;
   property?: CanonicalProperty;

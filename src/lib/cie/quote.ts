@@ -1,3 +1,4 @@
+import { CIE_DEFAULT_PINS } from "./contract";
 import { estimateHours, estimateLaborUnits, estimatePrice, type ServiceType } from "./labor";
 import { getCieNeighborhood, type NeighborhoodCieConfig } from "./neighborhoods";
 import type { CieQuote, CleaningProfile, PropertyFacts } from "./types";
@@ -15,7 +16,7 @@ export const tierToServiceType: Record<PricingTier, ServiceType> = {
   deep: "deep",
 };
 
-/** Service-specific multipliers applied after CIE base price */
+/** Job-type product overlay after CIE price (not part of CIE Model Registry). */
 export const serviceTierModifiers: Record<EstimatorService, Record<PricingTier, number>> = {
   residential: { refresh: 1, standard: 1, deep: 1 },
   airbnb: { refresh: 1.1, standard: 1.08, deep: 1.05 },
@@ -57,17 +58,19 @@ export interface QuoteInput {
   neighborhoodId: string;
   tier: PricingTier;
   service: EstimatorService;
-  /** CIE property facts — finished_sqft required for LU */
   propertyFacts: PropertyFacts;
-  /** CIE expected cleaning profile priors */
   cleaningProfile: CleaningProfile;
   laborModelVersion?: string;
   crewProductivityVersion?: string;
   pricingVersion?: string;
-  /** When true, skip tier-based profile adjustments (user already set priors) */
+  /** When true, skip tier-based profile adjustments (profile already from CIE) */
   lockProfile?: boolean;
 }
 
+/**
+ * Implements CIE POST /estimate-labor + POST /estimate-price locally.
+ * Pins default to Model Registry versions in CIE_DEFAULT_PINS.
+ */
 export function calculateCieQuote(input: QuoteInput): CieQuote {
   const neighborhood = getCieNeighborhood(input.neighborhoodId);
   return quoteForNeighborhood(neighborhood, input);
@@ -91,9 +94,10 @@ export function quoteForNeighborhood(
   };
 
   const serviceType = tierToServiceType[input.tier];
-  const laborModelVersion = input.laborModelVersion ?? "0.2.0";
-  const crewProductivityVersion = input.crewProductivityVersion ?? "0.2.0";
-  const pricingVersion = input.pricingVersion ?? "0.2.0";
+  const laborModelVersion = input.laborModelVersion ?? CIE_DEFAULT_PINS.labor_model;
+  const crewProductivityVersion =
+    input.crewProductivityVersion ?? CIE_DEFAULT_PINS.crew_productivity;
+  const pricingVersion = input.pricingVersion ?? CIE_DEFAULT_PINS.pricing;
 
   const labor = estimateLaborUnits(
     propertyFacts,
@@ -107,8 +111,6 @@ export function quoteForNeighborhood(
   const modifier = serviceTierModifiers[input.service][input.tier];
   const roundTo = 5;
   const sqft = Number(propertyFacts.finished_sqft ?? propertyFacts.parcel_sqft ?? 0);
-
-  // All tiers: CIE hour-based price from service_type productivity × service modifier.
   const adjusted = Math.max(120, Math.round((priced.price * modifier) / roundTo) * roundTo);
 
   return {
