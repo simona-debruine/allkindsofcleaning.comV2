@@ -1,11 +1,15 @@
 /**
  * TypeScript port of cleaning-intelligence-engine/engine/labor.py (Architecture v1.0).
- * Labor Units depend only on property facts + cleaning profile + labor-model version.
+ * Labor Units depend only on property facts + cleaning profile + labor-model version
+ * (+ service type for 0.2+).
  */
 
-import laborModel from "./models/labor-model-0.1.0.json";
-import crewProductivity from "./models/crew-productivity-0.1.0.json";
-import pricingModel from "./models/pricing-0.1.0.json";
+import laborModel010 from "./models/labor-model-0.1.0.json";
+import laborModel020 from "./models/labor-model-0.2.0.json";
+import crewProductivity010 from "./models/crew-productivity-0.1.0.json";
+import crewProductivity020 from "./models/crew-productivity-0.2.0.json";
+import pricingModel010 from "./models/pricing-0.1.0.json";
+import pricingModel020 from "./models/pricing-0.2.0.json";
 import type {
   CleaningProfile,
   ComplexityVector,
@@ -15,18 +19,34 @@ import type {
   PropertyFacts,
 } from "./types";
 
-type LaborModelJson = typeof laborModel;
-type CrewJson = typeof crewProductivity;
-type PricingJson = typeof pricingModel;
+/** CIE labor intensity — maps from site tiers refresh/standard/deep. */
+export type ServiceType = "deep" | "standard" | "light";
+
+type LaborModelJson = typeof laborModel010 | typeof laborModel020;
+type CrewJson = typeof crewProductivity010 | typeof crewProductivity020;
+type PricingJson = typeof pricingModel010 | typeof pricingModel020;
 
 const MODELS = {
-  "labor-model": { "0.1.0": laborModel as LaborModelJson },
-  "crew-productivity": { "0.1.0": crewProductivity as CrewJson },
-  pricing: { "0.1.0": pricingModel as PricingJson },
+  "labor-model": {
+    "0.1.0": laborModel010 as LaborModelJson,
+    "0.2.0": laborModel020 as LaborModelJson,
+  },
+  "crew-productivity": {
+    "0.1.0": crewProductivity010 as CrewJson,
+    "0.2.0": crewProductivity020 as CrewJson,
+  },
+  pricing: {
+    "0.1.0": pricingModel010 as PricingJson,
+    "0.2.0": pricingModel020 as PricingJson,
+  },
 } as const;
 
 function clamp(value: number, low: number, high: number): number {
   return Math.max(low, Math.min(high, value));
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
 }
 
 export function inferComplexity(
@@ -59,10 +79,6 @@ export function inferComplexity(
   };
 }
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
 export function complexitySum(vector: ComplexityVector): number {
   return Object.values(vector).reduce((a, b) => a + b, 0);
 }
@@ -75,35 +91,84 @@ export function timeMultiplier(total: number, model: LaborModelJson): number {
   return bands.very_high.time_multiplier;
 }
 
+function resolveServiceType(
+  model: LaborModelJson,
+  serviceType?: ServiceType | null,
+): ServiceType | "legacy" {
+  const services = "service_types" in model ? model.service_types : undefined;
+  if (!services) return "legacy";
+  const key =
+    (serviceType ||
+      ("default_service_type" in model ? model.default_service_type : undefined) ||
+      "standard") as ServiceType;
+  if (!(key in services)) {
+    throw new Error(`Unknown service_type ${serviceType}; expected deep|standard|light`);
+  }
+  return key;
+}
+
+function baseHoursForSqft(
+  sqft: number,
+  model: LaborModelJson,
+  serviceType: ServiceType | "legacy",
+): number {
+  const services = "service_types" in model ? model.service_types : undefined;
+  if (services && serviceType !== "legacy") {
+    const daySqft = Number(services[serviceType].sqft_per_cleaner_day);
+    const dayHours = Number(
+      "cleaner_day_hours" in model ? model.cleaner_day_hours : 8,
+    );
+    return sqft / (daySqft / dayHours);
+  }
+  const base = Number(
+    "labor" in model && model.labor && "base_lu_per_100_sqft" in model.labor
+      ? model.labor.base_lu_per_100_sqft
+      : 4,
+  );
+  return (sqft / 100.0) * base;
+}
+
 export function estimateLaborUnits(
   propertyFacts: PropertyFacts,
   cleaningProfile: CleaningProfile,
-  laborModelVersion = "0.1.0",
+  laborModelVersion = "0.2.0",
+  serviceType?: ServiceType | null,
 ): LaborEstimate {
-  const model = MODELS["labor-model"][laborModelVersion as "0.1.0"];
+  const model = MODELS["labor-model"][laborModelVersion as "0.1.0" | "0.2.0"];
   if (!model) throw new Error(`Unknown labor model version: ${laborModelVersion}`);
 
   const sqft = Number(propertyFacts.finished_sqft ?? propertyFacts.parcel_sqft ?? 1500);
-  const base = model.labor.base_lu_per_100_sqft;
+  const resolved = resolveServiceType(model, serviceType);
   const vector = inferComplexity(propertyFacts, cleaningProfile);
   const total = complexitySum(vector);
   const mult = timeMultiplier(total, model);
-  const lu = Math.round((sqft / 100.0) * base * mult * 10) / 10;
+  const baseHours = baseHoursForSqft(sqft, model, resolved);
+  const lu = Math.round(baseHours * mult * 10) / 10;
 
-  return {
+  const out: LaborEstimate = {
     estimated_lu: lu,
     complexity_vector: vector,
     complexity_sum: round2(total),
     time_multiplier: mult,
     labor_model: laborModelVersion,
+    sqft_used: sqft,
   };
+  if (resolved !== "legacy") {
+    out.service_type = resolved;
+    const services = (model as typeof laborModel020).service_types;
+    const daySqft = Number(services[resolved].sqft_per_cleaner_day);
+    const dayHours = Number((model as typeof laborModel020).cleaner_day_hours ?? 8);
+    out.sqft_per_cleaner_day = daySqft;
+    out.sqft_per_hour = Math.round((daySqft / dayHours) * 10000) / 10000;
+  }
+  return out;
 }
 
 export function estimateHours(
   estimatedLu: number,
-  crewProductivityVersion = "0.1.0",
+  crewProductivityVersion = "0.2.0",
 ): HoursEstimate {
-  const crew = MODELS["crew-productivity"][crewProductivityVersion as "0.1.0"];
+  const crew = MODELS["crew-productivity"][crewProductivityVersion as "0.1.0" | "0.2.0"];
   if (!crew) throw new Error(`Unknown crew productivity version: ${crewProductivityVersion}`);
 
   const hours = Math.round((estimatedLu / crew.labor_units_per_hour) * 100) / 100;
@@ -116,9 +181,9 @@ export function estimateHours(
 
 export function estimatePrice(
   estimatedHours: number,
-  pricingVersion = "0.1.0",
+  pricingVersion = "0.2.0",
 ): PriceEstimate {
-  const pricing = MODELS.pricing[pricingVersion as "0.1.0"];
+  const pricing = MODELS.pricing[pricingVersion as "0.1.0" | "0.2.0"];
   if (!pricing) throw new Error(`Unknown pricing version: ${pricingVersion}`);
 
   const raw = estimatedHours * pricing.hourly_rate;

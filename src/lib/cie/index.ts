@@ -3,6 +3,7 @@ export {
   estimateHours,
   estimatePrice,
   inferComplexity,
+  type ServiceType,
 } from "./labor";
 export {
   cieNeighborhoods,
@@ -14,6 +15,7 @@ export {
   formatCurrency,
   quoteForNeighborhood,
   serviceTierModifiers,
+  tierToServiceType,
   type EstimatorService,
   type PricingTier,
   type QuoteInput,

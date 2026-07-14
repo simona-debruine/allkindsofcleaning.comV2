@@ -98,11 +98,6 @@ export function deriveFromEnrichment(
 
   if (!options.usedGeoPriorsOnly) {
     enrichmentNotes.push(`Details from ${sourceParishDisplay}.`);
-    // Only surface provider notes when they match the resolved parish
-    // (avoids "No Orleans parcel match" on Covington / Metairie addresses).
-    if (property.notes && !isMismatchedParishNote(property.notes, sourceParish)) {
-      enrichmentNotes.push(property.notes);
-    }
   }
 
   const finished = fieldValue(property.finished_sqft);
@@ -171,7 +166,6 @@ export function deriveFromEnrichment(
   if (beds == null) thinFields.push("bedrooms");
   if (baths == null) thinFields.push("bathrooms");
   if (stories == null) thinFields.push("stories");
-  if (year == null) thinFields.push("year_built");
 
   const propertyFacts: PropertyFacts = {
     finished_sqft: livingSqft,
@@ -196,13 +190,6 @@ export function deriveFromEnrichment(
     sourceParish,
     sourceParishDisplay,
   };
-}
-
-function isMismatchedParishNote(note: string, parish: string | null): boolean {
-  const n = note.toLowerCase();
-  if (!parish) return /orleans|st\.?\s*charles|jefferson|st\.?\s*tammany/.test(n);
-  if (parish === "orleans") return false;
-  return n.includes("orleans");
 }
 
 export function isFieldThin(thinFields: string[], key: string): boolean {

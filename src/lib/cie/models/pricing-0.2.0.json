@@ -1,0 +1,10 @@
+{
+  "version": "0.2.0",
+  "name": "pricing",
+  "layer": "B",
+  "description": "Dynamic pricing from estimated crew hours. Does not affect Labor Units.",
+  "currency": "USD",
+  "hourly_rate": 50.0,
+  "minimum_price": 120.0,
+  "round_to": 5
+}

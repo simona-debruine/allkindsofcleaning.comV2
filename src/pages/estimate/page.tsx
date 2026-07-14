@@ -67,14 +67,26 @@ function NumberField({
     return next;
   };
 
+  /** Accept Google/Zillow pastes like "2,400", "2,400 sq ft", "2400sqft". */
+  const sanitize = (raw: string) => {
+    let s = raw.trim().replace(/,/g, "");
+    s = allowDecimal ? s.replace(/[^\d.]/g, "") : s.replace(/[^\d]/g, "");
+    if (allowDecimal) {
+      const dot = s.indexOf(".");
+      if (dot !== -1) s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, "");
+    }
+    return s;
+  };
+
   const commit = (raw: string) => {
-    if (raw.trim() === "" || raw === ".") {
+    const cleaned = sanitize(raw);
+    if (cleaned === "" || cleaned === ".") {
       const fallback = clamp(min ?? 0);
       setDraft(String(fallback));
       onChange(fallback);
       return;
     }
-    const parsed = Number(raw);
+    const parsed = Number(cleaned);
     if (!Number.isFinite(parsed)) {
       setDraft(format(value));
       return;
@@ -104,7 +116,7 @@ function NumberField({
           focusedRef.current = true;
         }}
         onChange={(e) => {
-          const raw = e.target.value;
+          const raw = sanitize(e.target.value);
           const pattern = allowDecimal ? /^\d*\.?\d*$/ : /^\d*$/;
           if (raw !== "" && !pattern.test(raw)) return;
           setDraft(raw);
@@ -116,6 +128,12 @@ function NumberField({
           if ((min == null || parsed >= min) && (max == null || parsed <= max)) {
             onChange(parsed);
           }
+        }}
+        onPaste={(e) => {
+          const text = e.clipboardData.getData("text");
+          if (!text) return;
+          e.preventDefault();
+          commit(text);
         }}
         onBlur={() => {
           focusedRef.current = false;
@@ -147,7 +165,6 @@ export default function EstimatePage() {
   const [canonical, setCanonical] = useState<CanonicalProperty | null>(null);
   const [thinFields, setThinFields] = useState<string[]>([]);
   const [enrichmentNotes, setEnrichmentNotes] = useState<string[]>([]);
-  const [livingSqftSource, setLivingSqftSource] = useState<string>("");
   const [neighborhoodId, setNeighborhoodId] = useState("");
   const [neighborhoodName, setNeighborhoodName] = useState("");
   const [sourceParishDisplay, setSourceParishDisplay] = useState("");
@@ -195,7 +212,6 @@ export default function EstimatePage() {
       setProperty(derived.propertyFacts);
       setThinFields(derived.thinFields);
       setEnrichmentNotes(derived.enrichmentNotes);
-      setLivingSqftSource(derived.livingSqftSource);
       setNeighborhoodId(derived.neighborhoodId);
       setNeighborhoodName(derived.neighborhood.name);
       setSourceParishDisplay(derived.sourceParishDisplay);
@@ -388,8 +404,6 @@ export default function EstimatePage() {
                         </>
                       ) : null}
                       Area: <span className="font-medium text-foreground-600">{neighborhoodName}</span>
-                      {" · "}
-                      living area from {livingSqftSource.replace(/_/g, " ")}
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -432,15 +446,6 @@ export default function EstimatePage() {
                         step={0.5}
                         thin={isFieldThin(thinFields, "stories")}
                         onChange={(n) => setProp("stories", n)}
-                      />
-                      <NumberField
-                        id="year_built"
-                        label="Year built"
-                        value={Number(property.year_built ?? 1980)}
-                        min={1800}
-                        max={2026}
-                        thin={isFieldThin(thinFields, "year_built")}
-                        onChange={(n) => setProp("year_built", n)}
                       />
                     </div>
 
@@ -491,7 +496,7 @@ export default function EstimatePage() {
                       {sqft ? (quote.price / sqft).toFixed(2) : "—"} / sq ft · {sqft.toLocaleString()}{" "}
                       sq ft
                     </p>
-                    <p className="text-sm text-white/75 mb-1">{tierLabels[tier]} clean</p>
+                    <p className="text-sm text-white/75 mb-1">{tierLabels[tier]}</p>
                     <p className="text-sm text-white/75 mb-6">
                       {quote.estimated_hours.toLocaleString(undefined, {
                         maximumFractionDigits: 2,
