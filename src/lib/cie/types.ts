@@ -35,6 +35,10 @@ export interface LaborEstimate {
   complexity_sum: number;
   time_multiplier: number;
   labor_model: string;
+  sqft_used?: number;
+  service_type?: "deep" | "standard" | "light";
+  sqft_per_cleaner_day?: number;
+  sqft_per_hour?: number;
 }
 
 export interface HoursEstimate {

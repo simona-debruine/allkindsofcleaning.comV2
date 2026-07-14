@@ -48,7 +48,7 @@ export const serviceTierModifiers: Record<EstimatorService, Record<PricingTier, 
 
 export const tierLabels: Record<PricingTier, string> = {
   refresh: "Quick Refresh",
-  standard: "Standard",
+  standard: "Standard Clean",
   deep: "Deep Clean",
 };
 

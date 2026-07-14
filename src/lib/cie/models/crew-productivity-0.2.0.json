@@ -1,0 +1,7 @@
+{
+  "version": "0.2.0",
+  "crew_size": 1,
+  "labor_units_per_hour": 1.0,
+  "effective_workday_hours": 8,
+  "notes": "Labor model 0.2+ emits LU as person-hours at the selected service type; convert 1:1 to hours for a single cleaner."
+}

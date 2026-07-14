@@ -1,9 +1,19 @@
-import { estimateHours, estimateLaborUnits, estimatePrice } from "./labor";
+import { estimateHours, estimateLaborUnits, estimatePrice, type ServiceType } from "./labor";
 import { getCieNeighborhood, type NeighborhoodCieConfig } from "./neighborhoods";
 import type { CieQuote, CleaningProfile, PropertyFacts } from "./types";
 
 export type PricingTier = "refresh" | "standard" | "deep";
 export type EstimatorService = "residential" | "airbnb" | "move-in-out";
+
+/**
+ * Map UI tiers → CIE labor service types (model 0.2.0 sqft/day rates).
+ * refresh = light (2500/day), standard (1750/day), deep (800/day).
+ */
+export const tierToServiceType: Record<PricingTier, ServiceType> = {
+  refresh: "light",
+  standard: "standard",
+  deep: "deep",
+};
 
 /** Service-specific multipliers applied after CIE base price */
 export const serviceTierModifiers: Record<EstimatorService, Record<PricingTier, number>> = {
@@ -13,8 +23,8 @@ export const serviceTierModifiers: Record<EstimatorService, Record<PricingTier, 
 };
 
 /**
- * Tier adjusts cleaning-profile priors before LU inference.
- * Refresh = lighter scope; deep = heavier density / finish work.
+ * Optional soft tweaks on cleaning-profile priors.
+ * Primary tier pricing comes from CIE service_type productivity, not these.
  */
 function applyTierToProfile(profile: CleaningProfile, tier: PricingTier): CleaningProfile {
   const clutter = Number(profile.clutter_prior ?? 0.35);
@@ -80,21 +90,26 @@ export function quoteForNeighborhood(
     ...input.propertyFacts,
   };
 
+  const serviceType = tierToServiceType[input.tier];
+  const laborModelVersion = input.laborModelVersion ?? "0.2.0";
+  const crewProductivityVersion = input.crewProductivityVersion ?? "0.2.0";
+  const pricingVersion = input.pricingVersion ?? "0.2.0";
+
   const labor = estimateLaborUnits(
     propertyFacts,
     profile,
-    input.laborModelVersion ?? "0.1.0",
+    laborModelVersion,
+    serviceType,
   );
-  const hours = estimateHours(
-    labor.estimated_lu,
-    input.crewProductivityVersion ?? "0.1.0",
-  );
-  const priced = estimatePrice(hours.estimated_hours, input.pricingVersion ?? "0.1.0");
+  const hours = estimateHours(labor.estimated_lu, crewProductivityVersion);
+  const priced = estimatePrice(hours.estimated_hours, pricingVersion);
 
   const modifier = serviceTierModifiers[input.service][input.tier];
   const roundTo = 5;
-  const adjusted = Math.max(120, Math.round((priced.price * modifier) / roundTo) * roundTo);
   const sqft = Number(propertyFacts.finished_sqft ?? propertyFacts.parcel_sqft ?? 0);
+
+  // All tiers: CIE hour-based price from service_type productivity × service modifier.
+  const adjusted = Math.max(120, Math.round((priced.price * modifier) / roundTo) * roundTo);
 
   return {
     ...labor,
