@@ -26,7 +26,17 @@ import {
   parishLabel,
 } from "./parish";
 
-const PE_PROXY = "/api/property/enrich";
+const PE_PROXY_DEFAULT = "/api/property/enrich";
+
+/** Prefer Amplify build env VITE_ENRICH_BFF_URL (Function URL); else Vite BFF path. */
+function propertyEnrichEndpoint(): string {
+  const fromEnv = (
+    (import.meta as ImportMeta & { env?: Record<string, string> }).env
+      ?.VITE_ENRICH_BFF_URL || ""
+  ).trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  return PE_PROXY_DEFAULT;
+}
 
 function geoOnlyProperty(address: string, parish: string): CanonicalProperty {
   return {
@@ -72,7 +82,7 @@ export async function localPropertyEnrich(
   const body: { address: string; parish?: string } = { address: trimmed };
   if (resolved) body.parish = resolved;
 
-  const res = await fetch(PE_PROXY, {
+  const res = await fetch(propertyEnrichEndpoint(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

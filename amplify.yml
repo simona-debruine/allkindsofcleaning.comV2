@@ -16,7 +16,13 @@ frontend:
       - .npm/**/*
       - node_modules/**/*
 
+# Proxy estimate enrichment through the Amplify-hosted reverse rewrite so the SPA
+# keeps calling same-origin /api/property/enrich (API key stays on the Lambda BFF).
+# This rule MUST come before the SPA catch-all.
 redirects:
+  - source: /api/property/enrich
+    target: https://dw5oeyk23i76jm6zfuzeb6n6je0sedkh.lambda-url.us-east-1.on.aws/
+    status: "200"
   - source: "/<*>"
     target: "/index.html"
     status: "404-200"
