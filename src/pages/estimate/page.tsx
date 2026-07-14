@@ -2,11 +2,13 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent }
 import { Link, useSearchParams } from "react-router-dom";
 import {
   calculateCieQuote,
-  deriveFromEnrichment,
-  enrichAddress,
+  cieNeighborhoods,
+  createEstimate,
   formatCurrency,
   isFieldThin,
+  tierToServiceType,
   type CanonicalProperty,
+  type CleaningProfile,
   type EstimatorService,
   type PricingTier,
   type PropertyFacts,
@@ -170,6 +172,7 @@ export default function EstimatePage() {
   const [sourceParishDisplay, setSourceParishDisplay] = useState("");
   const [explanation, setExplanation] = useState("");
   const [property, setProperty] = useState<PropertyFacts | null>(null);
+  const [cleaningProfile, setCleaningProfile] = useState<CleaningProfile>({});
   const [showOverrides, setShowOverrides] = useState(false);
 
   useLayoutEffect(() => {
@@ -178,15 +181,17 @@ export default function EstimatePage() {
 
   const quote = useMemo(() => {
     if (!property || !neighborhoodId) return null;
+    // Local recalc mirrors CIE POST /estimate-labor + POST /estimate-price
+    // (same Model Registry pins and service_type mapping).
     return calculateCieQuote({
       neighborhoodId,
       tier,
       service,
       propertyFacts: property,
-      cleaningProfile: {},
-      lockProfile: false,
+      cleaningProfile,
+      lockProfile: true,
     });
-  }, [property, neighborhoodId, tier, service]);
+  }, [property, neighborhoodId, tier, service, cleaningProfile]);
 
   const serviceInfo = estimatorServices[service];
   const sqft = Number(property?.finished_sqft ?? 0);
@@ -201,22 +206,24 @@ export default function EstimatePage() {
     setError(null);
     setLoading(true);
     try {
-      const result = await enrichAddress(address);
-      const derived = deriveFromEnrichment(result.property, address, {
-        parish: result.parish,
-        parishDisplay: result.parishDisplay,
-        usedGeoPriorsOnly: result.usedGeoPriorsOnly,
+      // Vertical slice via CIE API contract (local adapter until AWS HTTP ships).
+      const est = await createEstimate({
+        address,
+        service_type: tierToServiceType[tier],
       });
 
-      setCanonical(result.property);
-      setProperty(derived.propertyFacts);
-      setThinFields(derived.thinFields);
-      setEnrichmentNotes(derived.enrichmentNotes);
-      setNeighborhoodId(derived.neighborhoodId);
-      setNeighborhoodName(derived.neighborhood.name);
-      setSourceParishDisplay(derived.sourceParishDisplay);
-      setExplanation(derived.neighborhood.explanation);
-      setShowOverrides(derived.thinFields.length > 0);
+      setCanonical(est.property);
+      setProperty(est.property_facts);
+      setCleaningProfile(est.cleaning_profile);
+      setThinFields(est.thin_fields);
+      setEnrichmentNotes(est.enrichment_notes);
+      const match =
+        cieNeighborhoods.find((n) => n.geo_id === est.geo_id) ?? cieNeighborhoods[0];
+      setNeighborhoodId(match.id);
+      setNeighborhoodName(est.neighborhood_name);
+      setSourceParishDisplay(est.parish_display);
+      setExplanation(est.explanation);
+      setShowOverrides(est.thin_fields.length > 0);
     } catch (err) {
       setCanonical(null);
       setProperty(null);

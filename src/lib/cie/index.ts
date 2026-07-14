@@ -20,7 +20,8 @@ export {
   type PricingTier,
   type QuoteInput,
 } from "./quote";
-export { enrichAddress, type EnrichResult } from "./enrich";
+export { enrichAddress } from "./enrich";
+export type { EnrichResult } from "./canonical";
 export {
   deriveFromEnrichment,
   isFieldThin,
@@ -48,3 +49,24 @@ export type {
   PriceEstimate,
   PropertyFacts,
 } from "./types";
+export {
+  CIE_DEFAULT_PINS,
+  CIE_PATHS,
+  type CreateEstimateRequest,
+  type CreateEstimateResponse,
+  type EstimateLaborRequest,
+  type EstimateLaborResponse,
+  type EstimatePriceRequest,
+  type EstimatePriceResponse,
+  type ExpectedCleaningProfile,
+  type PropertyEnrichRequest,
+  type PropertyEnrichResponse,
+} from "./contract";
+export {
+  createEstimate,
+  estimateLabor,
+  estimatePriceQuote,
+  expectedCleaningProfile,
+  isCieRemoteConfigured,
+  propertyEnrich,
+} from "./client";
