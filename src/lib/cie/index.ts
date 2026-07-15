@@ -20,6 +20,29 @@ export {
   type PricingTier,
   type QuoteInput,
 } from "./quote";
+export {
+  basePerSqft,
+  formatPerSqft,
+  formatPerSqftRange,
+  formatServicePerSqftRange,
+  getDisplayPrice,
+  getEstimatorPerSqftMatrix,
+  getPricingTableRow,
+  getServiceHeadlinePrice,
+  getServicePriceNote,
+  isEstimatorServiceId,
+  marketingTierLabels,
+  pricingFootnote,
+  servicePerSqft,
+  servicePerSqftRange,
+} from "./displayPricing";
+export {
+  getIncrementalScope,
+  getStackedScope,
+  getStackedScopeItems,
+  tierScopeTasks,
+  type ScopedTask,
+} from "./tierScope";
 export { enrichAddress } from "./enrich";
 export type { EnrichResult } from "./canonical";
 export {
