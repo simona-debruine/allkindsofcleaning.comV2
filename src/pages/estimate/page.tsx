@@ -6,6 +6,8 @@ import {
   createEstimate,
   formatCurrency,
   isFieldThin,
+  marketingTierLabels,
+  tierScopeTasks,
   tierToServiceType,
   type CanonicalProperty,
   type CleaningProfile,
@@ -16,7 +18,6 @@ import {
 import {
   estimatorServices,
   parseEstimatorService,
-  tierLabels,
 } from "@/mocks/neighborhoodPricing";
 
 const jobTypes: { id: EstimatorService; label: string }[] = [
@@ -26,6 +27,12 @@ const jobTypes: { id: EstimatorService; label: string }[] = [
 ];
 
 const tierIds: PricingTier[] = ["refresh", "standard", "deep"];
+
+const tierColumns: { band: PricingTier; tasks: readonly string[]; checkClass: string }[] = [
+  { band: "refresh", tasks: tierScopeTasks.refresh, checkClass: "text-accent-500" },
+  { band: "standard", tasks: tierScopeTasks.standard, checkClass: "text-sky-400" },
+  { band: "deep", tasks: tierScopeTasks.deep, checkClass: "text-primary-600" },
+];
 
 const fieldClass =
   "w-full px-3 py-2.5 rounded-md border border-background-300/60 bg-background-50 text-foreground-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400";
@@ -195,6 +202,14 @@ export default function EstimatePage() {
 
   const serviceInfo = estimatorServices[service];
   const sqft = Number(property?.finished_sqft ?? 0);
+  const perSqft = quote && sqft > 0 ? quote.price / sqft : null;
+  const includedBands = new Set<PricingTier>(
+    tier === "refresh"
+      ? ["refresh"]
+      : tier === "standard"
+        ? ["refresh", "standard"]
+        : ["refresh", "standard", "deep"],
+  );
 
   const handleServiceChange = (next: EstimatorService) => {
     setService(next);
@@ -260,8 +275,8 @@ export default function EstimatePage() {
             Get Your <span className="font-light italic text-accent-400">Estimate</span>
           </h1>
           <p className="text-white/80 text-base md:text-lg max-w-2xl leading-relaxed">
-            Enter an address and get a tailored cleaning estimate for Greater New Orleans and the
-            Northshore.
+            Enter an address for a tailored cleaning estimate across Greater New
+            Orleans and the Northshore — priced per square foot for your home.
           </p>
         </div>
       </section>
@@ -333,9 +348,35 @@ export default function EstimatePage() {
                           : "bg-background-50 border-background-200/70 text-foreground-600 hover:border-primary-200"
                       }`}
                     >
-                      {tierLabels[t]}
+                      {marketingTierLabels[t]}
                     </button>
                   ))}
+                </div>
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {tierColumns.map(({ band, tasks, checkClass }) => {
+                    const included = includedBands.has(band);
+                    return (
+                      <div
+                        key={band}
+                        className={`transition-opacity ${included ? "opacity-100" : "opacity-40"}`}
+                      >
+                        <p className="text-[10px] font-semibold tracking-wide uppercase text-foreground-500 mb-2">
+                          {marketingTierLabels[band]}
+                        </p>
+                        <ul className="space-y-1.5">
+                          {tasks.map((task) => (
+                            <li
+                              key={task}
+                              className="flex items-start gap-1.5 text-xs text-foreground-600"
+                            >
+                              <i className={`ri-check-line mt-0.5 flex-shrink-0 ${checkClass}`} />
+                              <span>{task}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -494,21 +535,22 @@ export default function EstimatePage() {
                     </p>
 
                     <p className="text-xs uppercase tracking-widest text-white/60 mb-1">
-                      Estimated Quote
+                      Rate
                     </p>
                     <p className="font-heading font-bold text-3xl md:text-4xl mb-1">
-                      {formatCurrency(quote.price)}
+                      {perSqft != null ? `$${perSqft.toFixed(2)}/sqft` : "—"}
                     </p>
                     <p className="text-sm text-white/75 mb-1">
-                      {sqft ? (quote.price / sqft).toFixed(2) : "—"} / sq ft · {sqft.toLocaleString()}{" "}
-                      sq ft
+                      Estimated total {formatCurrency(quote.price)}
+                      {sqft ? ` · ${sqft.toLocaleString()} sq ft` : ""}
                     </p>
-                    <p className="text-sm text-white/75 mb-1">{tierLabels[tier]}</p>
+                    <p className="text-sm text-white/75 mb-1">{marketingTierLabels[tier]}</p>
                     <p className="text-sm text-white/75 mb-6">
+                      ~
                       {quote.estimated_hours.toLocaleString(undefined, {
-                        maximumFractionDigits: 2,
-                      })}{" "}
-                      labor hours
+                        maximumFractionDigits: 1,
+                      })}
+                      h for one cleaner
                     </p>
 
                     <div className="rounded-lg bg-white/10 border border-white/20 p-4 mb-6">

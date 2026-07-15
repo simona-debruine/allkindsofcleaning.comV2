@@ -1,3 +1,5 @@
+import { getServiceHeadlinePrice, getServicePriceNote } from "@/lib/cie/displayPricing";
+
 export interface ServiceFeature {
   text: string;
 }
@@ -20,7 +22,7 @@ export interface Service {
   popular?: boolean;
 }
 
-export const services: Service[] = [
+const rawServices: Omit<Service, "price" | "priceNote">[] = [
   {
     id: "residential",
     title: "Residential Home Cleaning",
@@ -306,8 +308,6 @@ export const services: Service[] = [
         alt: "Sanibel property 4 photo 9",
       },
     ],
-    price: "$110-200",
-    priceNote: "Standard Clean price. All tiers: $90-225",
     icon: "ri-home-smile-line",
     popular: true,
   },
@@ -608,8 +608,6 @@ export const services: Service[] = [
         alt: "Sanibel property 4 photo 9",
       },
     ],
-    price: "$125-210",
-    priceNote: "Standard Clean price. All tiers: $100-280",
     icon: "ri-hotel-bed-line",
   },
   {
@@ -633,8 +631,6 @@ export const services: Service[] = [
         alt: "Corporate conference room professionally cleaned",
       },
     ],
-    price: "$100-175",
-    priceNote: "Standard Clean price. All tiers: $85-230",
     icon: "ri-building-line",
   },
   {
@@ -658,8 +654,6 @@ export const services: Service[] = [
         alt: "Empty sunlit room with moving boxes ready for move-in or move-out cleaning",
       },
     ],
-    price: "$150-275",
-    priceNote: "Standard Clean price. All tiers: $50-275",
     icon: "ri-truck-line",
   },
   {
@@ -683,8 +677,6 @@ export const services: Service[] = [
         alt: "Cleaning crew using industrial vacuum on rug after construction cleanup",
       },
     ],
-    price: "$250-450",
-    priceNote: "Starting price based on scope",
     icon: "ri-hammer-line",
   },
   {
@@ -708,8 +700,12 @@ export const services: Service[] = [
         alt: "Professional cleaning windows with spray bottle and microfiber cloth",
       },
     ],
-    price: "$5",
-    priceNote: "Per window",
     icon: "ri-sun-line",
   },
 ];
+
+export const services: Service[] = rawServices.map((service) => ({
+  ...service,
+  price: getServiceHeadlinePrice(service.id),
+  priceNote: getServicePriceNote(service.id),
+}));

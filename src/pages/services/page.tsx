@@ -1,6 +1,15 @@
 import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { services } from "@/mocks/services";
+import {
+  getDisplayPrice,
+  getPricingTableRow,
+  isEstimatorServiceId,
+  marketingTierLabels,
+  pricingFootnote,
+  tierScopeTasks,
+  type PricingTier,
+} from "@/lib/cie";
 
 interface ImageCarouselProps {
   images: { url: string; alt: string }[];
@@ -101,15 +110,16 @@ function ImageCarousel({ images, serviceId }: ImageCarouselProps) {
   );
 }
 
-type PricingTier = "refresh" | "standard" | "deep";
-
-const ESTIMATOR_SERVICE_IDS = new Set(["residential", "airbnb", "move-in-out"]);
-
-const tierLabels: Record<PricingTier, string> = {
-  refresh: "Refresh",
-  standard: "Standard",
-  deep: "Deep Clean",
-};
+function getTierTaskBandClass(band: PricingTier): string {
+  switch (band) {
+    case "refresh":
+      return "bg-accent-100 text-accent-950 border-2 border-transparent";
+    case "standard":
+      return "bg-primary-100 text-primary-950 border-2 border-transparent";
+    case "deep":
+      return "bg-primary-400 text-primary-950 border-2 border-transparent";
+  }
+}
 
 function getTierButtonClass(tier: PricingTier, isActive: boolean): string {
   const base =
@@ -121,25 +131,13 @@ function getTierButtonClass(tier: PricingTier, isActive: boolean): string {
 
   switch (tier) {
     case "refresh":
-      return `${base} bg-transparent border-accent-500 text-accent-700`;
-    case "standard":
       return `${base} bg-accent-100 border-accent-300 text-accent-800`;
+    case "standard":
+      return `${base} bg-primary-100 border-primary-300 text-primary-900`;
     case "deep":
       return `${base} bg-primary-400 border-primary-300 text-primary-900`;
   }
 }
-
-const pricingMatrix: Record<
-  string,
-  { refresh: string; standard: string; deep: string }
-> = {
-  residential: { refresh: "$90-130", standard: "$110-200", deep: "$175-225" },
-  airbnb: { refresh: "$100-140", standard: "$125-210", deep: "$185-280" },
-  commercial: { refresh: "$85-125", standard: "$100-175", deep: "$150-230" },
-  "move-in-out": { refresh: "$50-85", standard: "$150-275", deep: "$150-275" },
-  "post-construction": { refresh: "$200-300", standard: "$250-450", deep: "$300-500" },
-  "window-cleaning": { refresh: "$5", standard: "$5", deep: "$8" },
-};
 
 const faqs = [
   {
@@ -160,7 +158,7 @@ const faqs = [
   {
     question: "How do I get a quote?",
     answer:
-      "Simply fill out the form on our Schedule page or call us directly at (769) 926-0646. We provide free, no-obligation quotes within 24 hours.",
+      "Use our cost estimator with your address, or call us at (769) 926-0646. Estimates adjust for your home; a $120 minimum applies.",
   },
 ];
 
@@ -171,6 +169,20 @@ export default function ServicesPage() {
 
   const [activeTier, setActiveTier] = useState<PricingTier>("standard");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const tierColumns: { band: PricingTier; tasks: readonly string[] }[] = [
+    { band: "refresh", tasks: tierScopeTasks.refresh },
+    { band: "standard", tasks: tierScopeTasks.standard },
+    { band: "deep", tasks: tierScopeTasks.deep },
+  ];
+
+  const includedBands = new Set<PricingTier>(
+    activeTier === "refresh"
+      ? ["refresh"]
+      : activeTier === "standard"
+        ? ["refresh", "standard"]
+        : ["refresh", "standard", "deep"],
+  );
 
   return (
     <main className="bg-background-50 text-foreground-950 min-h-screen">
@@ -197,9 +209,8 @@ export default function ServicesPage() {
           </h1>
           <p className="text-white/75 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Residential homes, Airbnb/Vacation rentals, personal and commercial
-            offices, and move in/move out cleanings — done right, every time.
-            Choose from one of our three tiers: a quick refresh, a standard
-            cleaning, or a deep clean.
+            offices, and move in/move out cleanings — priced by the square foot.
+            Choose Refresh, Standard, or Deep Clean.
           </p>
         </div>
       </section>
@@ -211,16 +222,50 @@ export default function ServicesPage() {
             <span className="text-xs font-medium tracking-widest uppercase text-foreground-400 mr-2 hidden sm:inline">
               Choose Your Level
             </span>
-            {(Object.keys(tierLabels) as PricingTier[]).map((tier) => (
+            {(Object.keys(marketingTierLabels) as PricingTier[]).map((tier) => (
               <button
                 key={tier}
                 className={getTierButtonClass(tier, activeTier === tier)}
                 onClick={() => setActiveTier(tier)}
                 type="button"
               >
-                {tierLabels[tier]}
+                {marketingTierLabels[tier]}
               </button>
             ))}
+          </div>
+          <div className="mt-6 max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {tierColumns.map(({ band, tasks }) => {
+              const included = includedBands.has(band);
+              return (
+                <div
+                  key={band}
+                  className={`transition-opacity ${included ? "opacity-100" : "opacity-40"}`}
+                >
+                  <p className="text-xs font-semibold tracking-wide uppercase text-foreground-500 mb-3 text-center">
+                    {marketingTierLabels[band]}
+                  </p>
+                  <ul className="flex flex-col gap-2">
+                    {tasks.map((task) => (
+                      <li
+                        key={task}
+                        className={`flex items-center gap-2 text-sm rounded-full px-4 py-2.5 ${getTierTaskBandClass(band)}`}
+                      >
+                        <i
+                          className={`ri-check-line flex-shrink-0 ${
+                            band === "refresh"
+                              ? "text-accent-600"
+                              : band === "standard"
+                                ? "text-primary-600"
+                                : "text-primary-900"
+                          }`}
+                        />
+                        <span>{task}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -244,7 +289,7 @@ export default function ServicesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
             {services.map((service) => {
-              const tierPrice = pricingMatrix[service.id]?.[activeTier] ?? service.price;
+              const tierPrice = getDisplayPrice(service.id, activeTier);
               return (
                 <div
                   key={service.id}
@@ -299,7 +344,7 @@ export default function ServicesPage() {
                         </p>
                       </div>
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                        {ESTIMATOR_SERVICE_IDS.has(service.id) && (
+                        {isEstimatorServiceId(service.id) && (
                           <Link
                             to={`/estimate?service=${service.id}`}
                             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-accent-500 text-accent-700 text-xs font-semibold rounded-md hover:bg-accent-50 transition-colors whitespace-nowrap"
@@ -337,8 +382,7 @@ export default function ServicesPage() {
               <span className="italic font-light text-accent-500">Pricing</span>
             </h2>
             <p className="text-foreground-600 text-sm md:text-base mt-3 max-w-lg mx-auto">
-              Every price is based on the service type and depth of clean. No
-              hidden fees — just the clean you choose.
+              {pricingFootnote}
             </p>
           </div>
 
@@ -350,10 +394,10 @@ export default function ServicesPage() {
                     Service Type
                   </th>
                   <th className="text-center py-3 px-4 text-xs font-medium text-foreground-400 uppercase tracking-wide">
-                    Quick Refresh
+                    Refresh
                   </th>
                   <th className="text-center py-3 px-4 text-xs font-medium text-foreground-400 uppercase tracking-wide">
-                    Standard Clean
+                    Standard
                   </th>
                   <th className="text-center py-3 px-4 text-xs font-medium text-foreground-400 uppercase tracking-wide">
                     Deep Clean
@@ -361,8 +405,17 @@ export default function ServicesPage() {
                 </tr>
               </thead>
               <tbody>
-                {services.map((service) => {
-                  const prices = pricingMatrix[service.id];
+                {[
+                  "residential",
+                  "airbnb",
+                  "move-in-out",
+                  "commercial",
+                  "post-construction",
+                  "window-cleaning",
+                ].map((serviceId) => {
+                  const service = services.find((s) => s.id === serviceId);
+                  if (!service) return null;
+                  const prices = getPricingTableRow(service.id);
                   if (!prices) return null;
                   return (
                     <tr
@@ -395,11 +448,11 @@ export default function ServicesPage() {
 
           <div className="text-center mt-8">
             <Link
-              to="/schedule"
+              to="/estimate"
               className="inline-flex items-center gap-1.5 px-6 py-3 bg-primary-500 text-white text-sm font-semibold rounded-full hover:bg-primary-600 transition-colors"
             >
-              Get a Custom Quote
-              <i className="ri-arrow-right-line" />
+              Get Your Estimate
+              <i className="ri-calculator-line" />
             </Link>
           </div>
         </div>
@@ -472,12 +525,12 @@ export default function ServicesPage() {
           </div>
           <Link
             to="/schedule"
-            className="inline-flex items-center gap-0 bg-white rounded-full overflow-hidden hover:shadow-lg transition-all group"
+            className="inline-flex items-stretch bg-white rounded-full overflow-hidden hover:shadow-lg transition-all group"
           >
-            <span className="px-6 py-3.5 text-sm font-semibold text-foreground-950 whitespace-nowrap">
+            <span className="px-6 py-3.5 text-sm font-semibold text-foreground-950 whitespace-nowrap flex items-center">
               Book a Cleaning
             </span>
-            <span className="w-11 h-11 bg-primary-500 flex items-center justify-center group-hover:bg-primary-600 transition-colors">
+            <span className="w-[3.25rem] bg-primary-500 flex items-center justify-center group-hover:bg-primary-600 transition-colors">
               <i className="ri-arrow-right-up-line text-white text-base" />
             </span>
           </Link>
