@@ -5,9 +5,9 @@ import {
   cieNeighborhoods,
   createEstimate,
   formatCurrency,
-  getStackedScope,
   isFieldThin,
   marketingTierLabels,
+  tierScopeTasks,
   tierToServiceType,
   type CanonicalProperty,
   type CleaningProfile,
@@ -27,6 +27,12 @@ const jobTypes: { id: EstimatorService; label: string }[] = [
 ];
 
 const tierIds: PricingTier[] = ["refresh", "standard", "deep"];
+
+const tierColumns: { band: PricingTier; tasks: readonly string[]; checkClass: string }[] = [
+  { band: "refresh", tasks: tierScopeTasks.refresh, checkClass: "text-accent-500" },
+  { band: "standard", tasks: tierScopeTasks.standard, checkClass: "text-sky-400" },
+  { band: "deep", tasks: tierScopeTasks.deep, checkClass: "text-primary-600" },
+];
 
 const fieldClass =
   "w-full px-3 py-2.5 rounded-md border border-background-300/60 bg-background-50 text-foreground-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400";
@@ -196,8 +202,14 @@ export default function EstimatePage() {
 
   const serviceInfo = estimatorServices[service];
   const sqft = Number(property?.finished_sqft ?? 0);
-  const scopeTasks = getStackedScope(tier);
   const perSqft = quote && sqft > 0 ? quote.price / sqft : null;
+  const includedBands = new Set<PricingTier>(
+    tier === "refresh"
+      ? ["refresh"]
+      : tier === "standard"
+        ? ["refresh", "standard"]
+        : ["refresh", "standard", "deep"],
+  );
 
   const handleServiceChange = (next: EstimatorService) => {
     setService(next);
@@ -340,14 +352,32 @@ export default function EstimatePage() {
                     </button>
                   ))}
                 </div>
-                <ul className="mt-4 space-y-1.5 max-h-48 overflow-y-auto">
-                  {scopeTasks.map((task) => (
-                    <li key={task} className="flex items-start gap-2 text-xs text-foreground-600">
-                      <i className="ri-check-line text-primary-500 mt-0.5 flex-shrink-0" />
-                      <span>{task}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {tierColumns.map(({ band, tasks, checkClass }) => {
+                    const included = includedBands.has(band);
+                    return (
+                      <div
+                        key={band}
+                        className={`transition-opacity ${included ? "opacity-100" : "opacity-40"}`}
+                      >
+                        <p className="text-[10px] font-semibold tracking-wide uppercase text-foreground-500 mb-2">
+                          {marketingTierLabels[band]}
+                        </p>
+                        <ul className="space-y-1.5">
+                          {tasks.map((task) => (
+                            <li
+                              key={task}
+                              className="flex items-start gap-1.5 text-xs text-foreground-600"
+                            >
+                              <i className={`ri-check-line mt-0.5 flex-shrink-0 ${checkClass}`} />
+                              <span>{task}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {error ? (
