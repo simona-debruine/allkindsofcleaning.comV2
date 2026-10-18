@@ -7,6 +7,7 @@ const serviceTypes = [
   "Move In / Move Out Cleaning",
   "Post-Construction Cleaning",
   "Window Cleaning",
+  "Garden Care",
 ];
 
 const FORM_URL = "https://readdy.ai/api/form/d97vcu2g3iubr452i8kg";
@@ -115,7 +116,7 @@ export default function ContactCTA() {
                 </div>
                 <div>
                   <div className="text-white/60 text-xs uppercase tracking-wide">Service Area</div>
-                  <div className="text-white font-medium">Greater Metropolitan Area</div>
+                  <div className="text-white font-medium">Greater Picayune area, Mississippi to the Northshore of Louisiana</div>
                 </div>
               </div>
             </div>

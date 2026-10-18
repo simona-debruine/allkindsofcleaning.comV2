@@ -13,6 +13,7 @@ const serviceTypes = [
   "Move In / Move Out Cleaning",
   "Post-Construction Cleaning",
   "Window Cleaning",
+  "Garden Care",
 ];
 
 const FORM_URL = "https://readdy.ai/api/form/d9824m7k7gok24d49vig";
@@ -154,7 +155,9 @@ export default function SchedulePage() {
             Book Your <span className="font-light italic text-accent-400">Cleaning</span>
           </h1>
           <p className="text-white/75 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-            Pick a date and time that works for you. We will confirm your appointment within 24 hours.
+            Pick a date and time that works for you. We serve the greater Picayune
+            area, Mississippi to the Northshore of Louisiana, and will confirm your
+            appointment within 24 hours.
           </p>
         </div>
       </section>

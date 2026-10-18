@@ -95,7 +95,7 @@ export function getEstimatorPerSqftMatrix(service: EstimatorService): PerSqftMat
 
 /**
  * Display cell for services pricing table / cards.
- * Estimator → $/sqft range; window → NOLA pane/window rates; other → custom scope.
+ * Estimator → $/sqft range; window → per-window rates; other → custom scope.
  */
 export function getDisplayPrice(serviceId: string, tier: PricingTier): string {
   if (isEstimatorServiceId(serviceId)) {
@@ -122,6 +122,7 @@ export function getServiceHeadlinePrice(serviceId: string): string {
   if (serviceId === "window-cleaning") return "$13/window";
   if (serviceId === "post-construction") return "Custom scope";
   if (serviceId === "commercial") return "Custom scope";
+  if (serviceId === "garden-care") return "Custom scope";
   return "Get estimate";
 }
 
@@ -134,6 +135,7 @@ export function getServicePriceNote(serviceId: string): string {
   }
   if (serviceId === "post-construction") return "Scoped to project — get estimate";
   if (serviceId === "commercial") return "Scheduled to your space — get estimate";
+  if (serviceId === "garden-care") return "Outdoor upkeep for your home — get a quote";
   return `$${MINIMUM_PRICE} minimum · get estimate`;
 }
 
@@ -148,7 +150,7 @@ export function getPricingTableRow(serviceId: string): PerSqftMatrix | null {
       deep: "$16/window",
     };
   }
-  if (serviceId === "commercial" || serviceId === "post-construction") {
+  if (serviceId === "commercial" || serviceId === "post-construction" || serviceId === "garden-care") {
     return { refresh: "Custom", standard: "Custom", deep: "Custom" };
   }
   return null;

@@ -24,10 +24,19 @@ export default function Navbar() {
   };
 
   const handleNavClick = (e: React.MouseEvent, path: string) => {
-    if (location.pathname === path) {
-      e.preventDefault();
-      scrollToTop();
+    const hashIndex = path.indexOf("#");
+    const pathname = hashIndex === -1 ? path : path.slice(0, hashIndex);
+    const hash = hashIndex === -1 ? "" : path.slice(hashIndex);
+    if (location.pathname !== pathname) return;
+
+    e.preventDefault();
+    if (hash) {
+      navigate(`${pathname}${hash}`);
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
     }
+    if (location.hash) navigate(pathname);
+    scrollToTop();
   };
 
   const handleContactClick = (e: React.MouseEvent) => {
@@ -48,6 +57,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "Services", href: "/services" },
+    { label: "Garden Care", href: "/services#garden-care" },
     { label: "Estimate", href: "/estimate" },
     { label: "Schedule", href: "/schedule" },
     { label: "Contact", onClick: handleContactClick, isContact: true },
@@ -103,7 +113,15 @@ export default function Navbar() {
                     scrolled || !isHome
                       ? "text-foreground-700"
                       : "text-white/80 hover:text-white"
-                  } ${location.pathname === link.href ? "text-primary-500" : ""}`}
+                  } ${
+                    link.href?.includes("#")
+                      ? location.pathname + location.hash === link.href
+                        ? "text-primary-500"
+                        : ""
+                      : location.pathname === link.href && location.hash !== "#garden-care"
+                        ? "text-primary-500"
+                        : ""
+                  }`}
                 >
                   {link.label}
                 </Link>

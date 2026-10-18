@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
-import { services } from "@/mocks/services";
+import { Link, useLocation } from "react-router-dom";
+import { isPastWorkPhoto, services } from "@/mocks/services";
 import {
   getDisplayPrice,
   getPricingTableRow,
@@ -58,6 +58,11 @@ function ImageCarousel({ images, serviceId }: ImageCarouselProps) {
         className="absolute inset-0 w-full h-full object-cover"
         src={active.url}
       />
+      {isPastWorkPhoto(active.url) && (
+        <span className="absolute bottom-3 left-3 z-10 rounded-md bg-black/55 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+          Past work
+        </span>
+      )}
       {images.length > 1 && (
         <>
           <button
@@ -143,7 +148,7 @@ const faqs = [
   {
     question: "What areas do you service?",
     answer:
-      "We proudly serve the Greater New Orleans region, Northshore, and Mississippi Gulf Coast. From the New Orleans West Bank through southeast Louisiana and the Mississippi Gulf Coast, our professional cleaning team brings spotless results.",
+      "We serve the greater Picayune area, Mississippi to the Northshore of Louisiana.",
   },
   {
     question: "Do I need to be home during the cleaning?",
@@ -163,9 +168,16 @@ const faqs = [
 ];
 
 export default function ServicesPage() {
+  const location = useLocation();
+
   useLayoutEffect(() => {
+    const id = location.hash.replace("#", "");
+    if (id) {
+      document.getElementById(id)?.scrollIntoView({ block: "start" });
+      return;
+    }
     window.scrollTo(0, 0);
-  }, []);
+  }, [location.hash]);
 
   const [activeTier, setActiveTier] = useState<PricingTier>("standard");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -209,8 +221,9 @@ export default function ServicesPage() {
           </h1>
           <p className="text-white/75 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Residential homes, Airbnb/Vacation rentals, personal and commercial
-            offices, and move in/move out cleanings — priced by the square foot.
-            Choose Refresh, Standard, or Deep Clean.
+            offices, move in/move out cleanings, and garden care across the greater
+            Picayune area, Mississippi to the Northshore of Louisiana. Choose Refresh,
+            Standard, or Deep Clean for indoor work.
           </p>
         </div>
       </section>
@@ -293,7 +306,8 @@ export default function ServicesPage() {
               return (
                 <div
                   key={service.id}
-                  className="group rounded-xl bg-background-50 border border-background-200/70 overflow-hidden hover:border-primary-200 hover:shadow-sm transition-all duration-300"
+                  id={service.id === "garden-care" ? "garden-care" : undefined}
+                  className="group rounded-xl bg-background-50 border border-background-200/70 overflow-hidden hover:border-primary-200 hover:shadow-sm transition-all duration-300 scroll-mt-28"
                 >
                   {/* Tag */}
                   <div className="relative">
@@ -412,6 +426,7 @@ export default function ServicesPage() {
                   "commercial",
                   "post-construction",
                   "window-cleaning",
+                  "garden-care",
                 ].map((serviceId) => {
                   const service = services.find((s) => s.id === serviceId);
                   if (!service) return null;
