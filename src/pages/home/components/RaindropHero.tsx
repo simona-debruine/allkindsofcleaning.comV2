@@ -51,8 +51,9 @@ export default function RaindropHero() {
           className={`reveal delay-4 ${inClass} mt-6 max-w-2xl text-base md:text-lg text-white/80 leading-relaxed`}
         >
           All Kinds of Cleaning delivers spotless residential and commercial spaces
-          with eco-friendly products and trained professionals. Drag your cursor across
-          the screen to wipe the glass clean and see the difference.
+          with eco-friendly products and trained professionals across the greater
+          Picayune area, Mississippi to the Northshore of Louisiana. Drag your cursor
+          across the screen to wipe the glass clean and see the difference.
         </p>
 
         <div className={`reveal delay-5 ${inClass} mt-8 flex flex-col sm:flex-row gap-4 pointer-events-auto`}>

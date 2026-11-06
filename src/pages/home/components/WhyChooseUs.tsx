@@ -101,8 +101,9 @@ export default function WhyChooseUs() {
             The Clean You Can Count On
           </h2>
           <p className="text-foreground-600 text-base md:text-lg leading-relaxed">
-            We do not just clean surfaces. We build trust, one sparkling room at a time.
-            Here is what sets All Kinds of Cleaning apart from the rest.
+            We do not just clean surfaces. We build trust, one sparkling room at a time,
+            for households in the greater Picayune area, Mississippi to the Northshore
+            of Louisiana. Here is what sets All Kinds of Cleaning apart from the rest.
           </p>
         </div>
 

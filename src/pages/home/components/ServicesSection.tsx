@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { services } from "@/mocks/services";
+import { isPastWorkPhoto, services } from "@/mocks/services";
 
 export default function ServicesSection() {
   return (
@@ -11,12 +11,12 @@ export default function ServicesSection() {
             What We Do
           </span>
           <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-foreground-950 tracking-tight mb-4">
-            Cleaning Services for Every Space
+            Services for Every Space
           </h2>
           <p className="text-foreground-600 text-base md:text-lg leading-relaxed mb-6">
-            From cozy homes to vacation rentals and corporate offices, we bring
-            the same level of dedication and attention to detail to every
-            cleaning job we take on.
+            From cozy homes and garden beds to vacation rentals and offices, we
+            bring the same care to every job across the greater Picayune area,
+            Mississippi to the Northshore of Louisiana.
           </p>
           <Link
             to="/services"
@@ -32,7 +32,7 @@ export default function ServicesSection() {
           {services.map((service) => (
             <Link
               key={service.id}
-              to="/services"
+              to={service.id === "garden-care" ? "/services#garden-care" : "/services"}
               className="group rounded-xl bg-background-100 border border-background-200/70 overflow-hidden hover:border-primary-200 hover:shadow-sm transition-all duration-300"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden">
@@ -44,6 +44,11 @@ export default function ServicesSection() {
                 <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-foreground-800 text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-md">
                   {service.tag}
                 </span>
+                {isPastWorkPhoto(service.images[0].url) && (
+                  <span className="absolute bottom-3 left-3 rounded-md bg-black/55 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    Past work
+                  </span>
+                )}
               </div>
               <div className="p-5 md:p-6">
                 <div className="flex items-center gap-2 mb-2">

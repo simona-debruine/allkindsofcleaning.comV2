@@ -14,6 +14,7 @@ export default function Footer() {
         { label: "Move In / Move Out", href: "/services" },
         { label: "Post-Construction", href: "/services" },
         { label: "Window Cleaning", href: "/services" },
+        { label: "Garden Care", href: "/services#garden-care" },
       ],
     },
     {
@@ -36,10 +37,13 @@ export default function Footer() {
             <Link to="/" className="mb-4">
               <BrandLogo textClassName="font-heading font-bold text-lg text-foreground-950 whitespace-nowrap" />
             </Link>
-            <p className="text-foreground-600 text-sm leading-relaxed max-w-md mb-6">
+            <p className="text-foreground-600 text-sm leading-relaxed max-w-md mb-4">
               Professional residential and commercial cleaning services you can trust.
               Eco-friendly products, trained staff, and a 100% satisfaction guarantee
               on every job we complete.
+            </p>
+            <p className="text-foreground-700 text-sm leading-relaxed max-w-md mb-6">
+              Serving the greater Picayune area, Mississippi to the Northshore of Louisiana.
             </p>
             <div className="flex items-center gap-3">
               <a

@@ -19,6 +19,7 @@ import {
   estimatorServices,
   parseEstimatorService,
 } from "@/mocks/neighborhoodPricing";
+import { SERVICE_AREA_LABEL } from "@/content/serviceArea";
 
 const jobTypes: { id: EstimatorService; label: string }[] = [
   { id: "residential", label: "Recurring / residential" },
@@ -175,8 +176,6 @@ export default function EstimatePage() {
   const [thinFields, setThinFields] = useState<string[]>([]);
   const [enrichmentNotes, setEnrichmentNotes] = useState<string[]>([]);
   const [neighborhoodId, setNeighborhoodId] = useState("");
-  const [neighborhoodName, setNeighborhoodName] = useState("");
-  const [sourceParishDisplay, setSourceParishDisplay] = useState("");
   const [explanation, setExplanation] = useState("");
   const [property, setProperty] = useState<PropertyFacts | null>(null);
   const [cleaningProfile, setCleaningProfile] = useState<CleaningProfile>({});
@@ -235,8 +234,6 @@ export default function EstimatePage() {
       const match =
         cieNeighborhoods.find((n) => n.geo_id === est.geo_id) ?? cieNeighborhoods[0];
       setNeighborhoodId(match.id);
-      setNeighborhoodName(est.neighborhood_name);
-      setSourceParishDisplay(est.parish_display);
       setExplanation(est.explanation);
       setShowOverrides(est.thin_fields.length > 0);
     } catch (err) {
@@ -275,8 +272,9 @@ export default function EstimatePage() {
             Get Your <span className="font-light italic text-accent-400">Estimate</span>
           </h1>
           <p className="text-white/80 text-base md:text-lg max-w-2xl leading-relaxed">
-            Enter an address for a tailored cleaning estimate across Greater New
-            Orleans and the Northshore — priced per square foot for your home.
+            Enter an address for a tailored cleaning estimate in the greater
+            Picayune area, Mississippi to the Northshore of Louisiana — priced per
+            square foot for your home.
           </p>
         </div>
       </section>
@@ -307,7 +305,7 @@ export default function EstimatePage() {
                   type="text"
                   required
                   autoComplete="street-address"
-                  placeholder="e.g. 17228 River Road, Hahnville, LA"
+                  placeholder="e.g. a home in Picayune, MS"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className={fieldClass}
@@ -444,14 +442,8 @@ export default function EstimatePage() {
                 {showOverrides ? (
                   <div className="mt-6 space-y-5">
                     <p className="text-xs text-foreground-400">
-                      {sourceParishDisplay ? (
-                        <>
-                          Details from{" "}
-                          <span className="font-medium text-foreground-600">{sourceParishDisplay}</span>
-                          {" · "}
-                        </>
-                      ) : null}
-                      Area: <span className="font-medium text-foreground-600">{neighborhoodName}</span>
+                      Service area:{" "}
+                      <span className="font-medium text-foreground-600">{SERVICE_AREA_LABEL}</span>
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -516,8 +508,8 @@ export default function EstimatePage() {
                       Your quote appears here
                     </p>
                     <p className="text-sm leading-relaxed">
-                      Enter an address and we&apos;ll prepare a neighborhood-aware estimate for your
-                      home.
+                      Enter an address in the greater Picayune area, Mississippi to the
+                      Northshore of Louisiana, and we&apos;ll prepare an estimate for your home.
                     </p>
                   </div>
                 ) : (
@@ -530,8 +522,7 @@ export default function EstimatePage() {
                       {canonical?.address}
                     </p>
                     <p className="text-white/55 text-xs mb-6">
-                      {neighborhoodName}
-                      {sourceParishDisplay ? ` · ${sourceParishDisplay}` : ""}
+                      {SERVICE_AREA_LABEL}
                     </p>
 
                     <p className="text-xs uppercase tracking-widest text-white/60 mb-1">

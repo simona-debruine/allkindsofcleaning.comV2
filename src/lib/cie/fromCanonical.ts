@@ -97,7 +97,7 @@ export function deriveFromEnrichment(
     (sourceParish ? sourceParish.replace(/_/g, " ") : "area averages");
 
   if (!options.usedGeoPriorsOnly) {
-    enrichmentNotes.push(`Details from ${sourceParishDisplay}.`);
+    enrichmentNotes.push("Property details came from public records for this address.");
   }
 
   const finished = fieldValue(property.finished_sqft);
@@ -117,7 +117,7 @@ export function deriveFromEnrichment(
     livingSqftSource = "finished_sqft";
     if (options.usedGeoPriorsOnly) {
       enrichmentNotes.push(
-        `Details from ${sourceParishDisplay} — parcel GIS is not connected for this parish yet; using local area averages.`,
+        "Parcel records are not connected for this address yet. Using local area averages until you confirm the details.",
       );
     }
   } else if (
@@ -131,7 +131,7 @@ export function deriveFromEnrichment(
     thinFields.push("finished_sqft");
     if (options.usedGeoPriorsOnly) {
       enrichmentNotes.push(
-        `Details from ${sourceParishDisplay} — parcel GIS is not connected for this parish yet.\nHeated living area missing — using parcel size as a temporary stand-in. Confirm living area.`,
+        "Parcel records are not connected for this address yet.\nHeated living area missing — using parcel size as a temporary stand-in. Confirm living area.",
       );
     } else {
       enrichmentNotes.push(
@@ -145,7 +145,7 @@ export function deriveFromEnrichment(
     if (typeof parcel === "number" && parcel > MAX_REASONABLE_LIVING_SQFT) {
       if (options.usedGeoPriorsOnly) {
         enrichmentNotes.push(
-          `Details from ${sourceParishDisplay} — parcel GIS is not connected for this parish yet.\nParcel is ${parcel.toLocaleString()} sq ft (lot, not living area). Confirm heated living area.`,
+          `Parcel records are not connected for this address yet.\nParcel is ${parcel.toLocaleString()} sq ft (lot, not living area). Confirm heated living area.`,
         );
       } else {
         enrichmentNotes.push(
@@ -154,11 +154,11 @@ export function deriveFromEnrichment(
       }
     } else if (options.usedGeoPriorsOnly) {
       enrichmentNotes.push(
-        `Details from ${sourceParishDisplay} — parcel GIS is not connected for this parish yet\nUsing local area averages seeded from ${neighborhood.name} average (${neighborhood.averageSqft.toLocaleString()} sq ft).`,
+        `Parcel records are not connected for this address yet.\nUsing a typical home in our service area (${neighborhood.averageSqft.toLocaleString()} sq ft) until you confirm living area.`,
       );
     } else {
       enrichmentNotes.push(
-        `Living area not in parish records — seeded from ${neighborhood.name} average (${neighborhood.averageSqft.toLocaleString()} sq ft).`,
+        `Living area was not in the property records — using a typical home size (${neighborhood.averageSqft.toLocaleString()} sq ft) until you confirm it.`,
       );
     }
   }
